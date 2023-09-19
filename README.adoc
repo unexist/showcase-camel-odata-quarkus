@@ -1,0 +1,8 @@
+= Showcase for Camel and OData based on Quarkus
+
+This project holds a showcase for Camel in combination with OData related things.
+
+== Links
+
+- https://olingo.apache.org/doc/odata4/index.html
+- https://camel.apache.org/camel-quarkus/3.2.x/reference/extensions/olingo4.html
