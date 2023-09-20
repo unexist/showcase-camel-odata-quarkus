@@ -1,7 +1,7 @@
 /**
- * @package Showcase-Camel-OData-Quarkus
+ * @package Showcase-OData-Quarkus
  *
- * @file
+ * @file Todo domain service
  * @copyright 2023-present Christoph Kappel <christoph@unexist.dev>
  * @version $Id$
  *
@@ -9,56 +9,52 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo;
-
-import io.quarkus.runtime.annotations.RegisterForReflection;
+package dev.unexist.showcase.todo.domain.todo;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 
-@RegisterForReflection
 @ApplicationScoped
 public class TodoService {
 
     @Inject
-    private TodoRepository todoRepository;
+    TodoRepository todoRepository;
 
     /**
      * Create new {@link Todo} entry and store it in repository
      *
-     * @param todo
-     *         A {@link Todo} to add
+     * @param  base  A {@link TodoBase} entry
      *
-     * @return Either {@code true} on success; otherwise {@code false}
+     * @return Either id of the entry on success; otherwise {@code -1}
      **/
 
-    public boolean create(Todo todo) {
-        this.todoRepository.add(todo);
+    public Optional<Todo> create(TodoBase base) {
+        Todo todo = new Todo(base);
 
-        return true;
+        boolean retval = this.todoRepository.add(todo);
+
+        return Optional.ofNullable(retval ? todo : null);
     }
 
     /**
      * Update {@link Todo} at with given id
      *
-     * @param id
-     *         Id to update
-     * @param values
-     *         Values for the entry
+     * @param  id    Id to update
+     * @param  base  Values for the entry
      *
      * @return Either {@code true} on success; otherwise {@code false}
      **/
 
-    public boolean update(int id, Todo values) {
+    public boolean update(int id, TodoBase base) {
         Optional<Todo> todo = this.findById(id);
         boolean ret = false;
 
         if (todo.isPresent()) {
-            values.setId(todo.get().getId());
+            todo.get().update(base);
 
-            ret = this.todoRepository.update(values);
+            ret = this.todoRepository.update(todo.get());
         }
 
         return ret;
@@ -67,8 +63,7 @@ public class TodoService {
     /**
      * Delete {@link Todo} with given id
      *
-     * @param id
-     *         Id to delete
+     * @param  id  Id to delete
      *
      * @return Either {@code true} on success; otherwise {@code false}
      **/
@@ -90,8 +85,7 @@ public class TodoService {
     /**
      * Find {@link Todo} by given id
      *
-     * @param id
-     *         Id to look for
+     * @param  id  Id to look for
      *
      * @return A {@link Optional} of the entry
      **/

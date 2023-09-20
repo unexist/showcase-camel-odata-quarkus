@@ -1,7 +1,7 @@
 /**
- * @package Showcase-Camel-OData-Quarkus
+ * @package Showcase-OData-Quarkus
  *
- * @file
+ * @file Todo base class
  * @copyright 2023-present Christoph Kappel <christoph@unexist.dev>
  * @version $Id$
  *
@@ -9,52 +9,25 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo;
+package dev.unexist.showcase.todo.domain.todo;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-@RegisterForReflection
-public class Todo {
-    private int id;
+import jakarta.validation.constraints.NotBlank;
+import java.util.Objects;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TodoBase {
+
+    @NotBlank
     private String title;
+
+    @NotBlank
     private String description;
+
     private Boolean done;
 
-    /**
-     * Construct a new {@link Todo}
-     *
-     * @param  id           Id of the entry
-     * @param  title        Title of the entry
-     * @param  description  Description of the entry
-     * @param  done         Done state of the entry
-     **/
-
-    public Todo(int id, String title, String description, Boolean done) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.done = done;
-    }
-
-    /**
-     * Get id of entry
-     *
-     * @return Id of the entry
-     **/
-
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * Set id of entry
-     *
-     * @param  id  Id of the entry
-     **/
-
-    public void setId(int id) {
-        this.id = id;
-    }
+    private DueDate dueDate;
 
     /**
      * Get title of the entry
@@ -115,5 +88,31 @@ public class Todo {
 
     public void setDone(Boolean done) {
         this.done = done;
+    }
+
+    /**
+     * Get due state of the entry
+     *
+     * @return Due state of the entry
+     **/
+
+    public DueDate getDueDate() {
+        return dueDate;
+    }
+
+    /**
+     * Set due date of the entry
+     *
+     * @param  dueDate  Due date of the entry
+     **/
+
+    public void setDueDate(DueDate dueDate) {
+        Objects.requireNonNull(dueDate, "DueDate cannot be null");
+
+        this.dueDate = dueDate;
+
+        if (null != dueDate.getStart() && null != dueDate.getDue()) {
+            this.done = dueDate.getStart().isBefore(dueDate.getDue());
+        }
     }
 }

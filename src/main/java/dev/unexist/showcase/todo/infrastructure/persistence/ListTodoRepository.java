@@ -1,30 +1,32 @@
 /**
- * @package Showcase-Camel-OData-Quarkus
+ * @package Showcase-OData-Quarkus
  *
- * @file
- * @copyright 2023-present Christoph Kappel <christoph@unexist.dev>
+ * @file Todo list repository
+ * @copyright 2022-present Christoph Kappel <christoph@unexist.dev>
  * @version $Id$
  *
  * This program can be distributed under the terms of the Apache License v2.0.
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo;
+package dev.unexist.showcase.todo.infrastructure.persistence;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import dev.unexist.showcase.todo.domain.todo.Todo;
+import dev.unexist.showcase.todo.domain.todo.TodoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@RegisterForReflection
 @ApplicationScoped
-public class TodoRepository {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TodoRepository.class);
+@Named("todo_list")
+public class ListTodoRepository implements TodoRepository {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ListTodoRepository.class);
 
     private final List<Todo> list;
 
@@ -32,34 +34,18 @@ public class TodoRepository {
      * Constructor
      **/
 
-    public TodoRepository() {
+    ListTodoRepository() {
         this.list = new ArrayList<>();
     }
 
-    /**
-     * Add {@link Todo} entry to list
-     *
-     * @param todo
-     *         {@link Todo} entry to add
-     *
-     * @return Either {@code true} on success; otherwise {@code false}
-     **/
-
+    @Override
     public boolean add(final Todo todo) {
         todo.setId(this.list.size() + 1);
 
         return this.list.add(todo);
     }
 
-    /**
-     * Update {@link Todo} with given id
-     *
-     * @param todo
-     *         A {@link Todo} to update
-     *
-     * @return Either {@code true} on success; otherwise {@code false}
-     **/
-
+    @Override
     public boolean update(final Todo todo) {
         boolean ret = false;
 
@@ -74,15 +60,7 @@ public class TodoRepository {
         return ret;
     }
 
-    /**
-     * Delete {@link Todo} with given id
-     *
-     * @param id
-     *         Id to delete
-     *
-     * @return Either {@code true} on success; otherwise {@code false}
-     **/
-
+    @Override
     public boolean deleteById(int id) {
         boolean ret = false;
 
@@ -97,25 +75,12 @@ public class TodoRepository {
         return ret;
     }
 
-    /**
-     * Get all {@link Todo} entries
-     *
-     * @return List of all stored {@link Todo}
-     **/
-
+    @Override
     public List<Todo> getAll() {
         return Collections.unmodifiableList(this.list);
     }
 
-    /**
-     * Find {@link Todo} by given id
-     *
-     * @param id
-     *         Id to find
-     *
-     * @return A {@link Optional} with the result of the lookup
-     **/
-
+    @Override
     public Optional<Todo> findById(int id) {
         return this.list.stream()
                 .filter(t -> t.getId() == id)
