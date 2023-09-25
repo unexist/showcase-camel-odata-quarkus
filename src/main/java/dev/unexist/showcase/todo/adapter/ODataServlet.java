@@ -11,10 +11,22 @@
 
 package dev.unexist.showcase.todo.adapter;
 
-import javax.inject.Inject;
+import org.apache.olingo.server.api.OData;
+import org.apache.olingo.server.api.ODataHttpHandler;
+import org.apache.olingo.server.api.ServiceMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+
+@WebServlet(name = "ODataServlet", urlPatterns = "/odata/*")
 public class ODataServlet extends HttpServlet {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ODataResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ODataServlet.class);
 
     @Inject
     EdmProvider edmProvider;
@@ -24,6 +36,8 @@ public class ODataServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        LOGGER.info("odata1");
+
         try {
             OData odata = OData.newInstance();
             ServiceMetadata edm = odata.createServiceMetadata(edmProvider,
