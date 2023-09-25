@@ -5,3 +5,4 @@ This project holds a showcase for OData related things.
 == Links
 
 - https://olingo.apache.org/doc/odata4/index.html
+- https://olingo.apache.org/doc/odata4/tutorials/read/tutorial_read.html
