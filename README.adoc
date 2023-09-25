@@ -6,3 +6,7 @@ This project holds a showcase for OData related things.
 
 - https://olingo.apache.org/doc/odata4/index.html
 - https://olingo.apache.org/doc/odata4/tutorials/read/tutorial_read.html
+- https://issues.apache.org/jira/browse/OLINGO-1600
+- https://github.com/quarkusio/quarkus/issues/8228
+- https://rashmini.medium.com/quarkus-creating-a-web-xml-based-servlet-application-with-filtering-98c335987b20
+- https://github.com/gopinnath/servlet-example/blob/main/src/main/java/org/gopinnath/GreetingServlet.java
