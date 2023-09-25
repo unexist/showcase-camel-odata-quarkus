@@ -22,7 +22,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +30,7 @@ import java.util.List;
 
 @ApplicationScoped
 public class EdmProvider extends CsdlAbstractEdmProvider {
-    public static final String NAMESPACE = "OData.Todo";
+    public static final String NAMESPACE = "OData.Demo";
     public static final String CONTAINER_NAME = "Container";
     public static final String ET_PRODUCT_NAME = "Todo";
     public static final String ES_PRODUCTS_NAME = "Todos";

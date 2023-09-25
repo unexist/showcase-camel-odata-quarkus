@@ -36,8 +36,8 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -104,6 +104,7 @@ public class EntityCollectionProcessor implements org.apache.olingo.server.api.p
             List<Entity> todoList = todosCollection.getEntities();
 
             Iterable<Todo> todos = repository.getAll();
+
             for (Todo todo : todos) {
                 Entity entity = new Entity()
                         .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, todo.getId()))

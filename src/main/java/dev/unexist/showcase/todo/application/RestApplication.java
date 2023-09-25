@@ -11,7 +11,7 @@
 
 package dev.unexist.showcase.todo.application;
 
-import jakarta.ws.rs.core.Application;
+import javax.ws.rs.core.Application;
 
 public class RestApplication extends Application {
 }

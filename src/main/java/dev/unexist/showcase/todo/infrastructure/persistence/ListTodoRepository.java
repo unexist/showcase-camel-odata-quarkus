@@ -16,8 +16,8 @@ import dev.unexist.showcase.todo.domain.todo.TodoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
