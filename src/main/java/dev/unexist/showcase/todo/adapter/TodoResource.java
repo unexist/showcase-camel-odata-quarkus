@@ -57,7 +57,7 @@ public class TodoResource {
             @APIResponse(responseCode = "500", description = "Server error")
     })
     public Response create(TodoBase todoBase, @Context UriInfo uriInfo) {
-        Response.ResponseBuilder response;
+        Response.ResponseBuilder builder;
 
         Optional<Todo> todo = this.todoService.create(todoBase);
 
@@ -66,12 +66,12 @@ public class TodoResource {
                     .path(Integer.toString(todo.get().getId()))
                     .build();
 
-            response = Response.created(uri);
+            builder = Response.created(uri);
         } else {
-            response = Response.status(Response.Status.NOT_ACCEPTABLE);
+            builder = Response.status(Response.Status.NOT_ACCEPTABLE);
         }
 
-        return response.build();
+        return builder.build();
     }
 
     @GET
@@ -87,15 +87,15 @@ public class TodoResource {
     public Response getAll() {
         List<Todo> todoList = this.todoService.getAll();
 
-        Response.ResponseBuilder response;
+        Response.ResponseBuilder builder;
 
         if (todoList.isEmpty()) {
-            response = Response.noContent();
+            builder = Response.noContent();
         } else {
-            response = Response.ok(Entity.json(todoList));
+            builder = Response.ok(Entity.json(todoList));
         }
 
-        return response.build();
+        return builder.build();
     }
 
     @GET
@@ -112,15 +112,15 @@ public class TodoResource {
     public Response findById(@PathParam("id") int id) {
         Optional<Todo> result = this.todoService.findById(id);
 
-        Response.ResponseBuilder response;
+        Response.ResponseBuilder builder;
 
         if (result.isPresent()) {
-            response = Response.ok(Entity.json(result.get()));
+            builder = Response.ok(Entity.json(result.get()));
         } else {
-            response = Response.status(Response.Status.NOT_FOUND);
+            builder = Response.status(Response.Status.NOT_FOUND);
         }
 
-        return response.build();
+        return builder.build();
     }
 
     @PUT
@@ -135,15 +135,15 @@ public class TodoResource {
             @APIResponse(responseCode = "500", description = "Server error")
     })
     public Response update(@PathParam("id") int id, TodoBase base) {
-        Response.ResponseBuilder response;
+        Response.ResponseBuilder builder;
 
         if (this.todoService.update(id, base)) {
-            response = Response.noContent();
+            builder = Response.noContent();
         } else {
-            response = Response.status(Response.Status.NOT_FOUND);
+            builder = Response.status(Response.Status.NOT_FOUND);
         }
 
-        return response.build();
+        return builder.build();
     }
 
     @DELETE
@@ -153,14 +153,14 @@ public class TodoResource {
     @Operation(summary = "Delete todo by id")
     @Tag(name = "Todo")
     public Response delete(@PathParam("id") int id, TodoBase base) {
-        Response.ResponseBuilder response;
+        Response.ResponseBuilder builder;
 
         if (this.todoService.delete(id)) {
-            response = Response.noContent();
+            builder = Response.noContent();
         } else {
-            response = Response.status(Response.Status.NOT_FOUND);
+            builder = Response.status(Response.Status.NOT_FOUND);
         }
 
-        return response.build();
+        return builder.build();
     }
 }
