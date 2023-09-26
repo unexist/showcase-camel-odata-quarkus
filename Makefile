@@ -17,3 +17,20 @@ todo:
 
 list:
 	@curl -X 'GET' 'http://localhost:8080/todo' -H 'accept: */*' | jq .
+
+
+# Odata
+od-meta:
+	curl -v http://localhost:8080/odata/$$metadata | jq .
+
+od-all:
+	curl -v http://localhost:8080/odata/Todos | jq .
+
+od-first:
+	curl -v http://localhost:8080/odata/Todos\(1\) | jq .
+
+od-first-name:
+	curl -v http://localhost:8080/odata/Todos\(ID=1\)/Name | jq .
+
+od-first-descr:
+	curl -v http://localhost:8080/odata/Todos\(ID=1\)/Description | jq .
