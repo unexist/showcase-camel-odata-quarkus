@@ -22,6 +22,7 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,21 +34,23 @@ import java.util.ArrayList;
 public class ODataServlet extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ODataServlet.class);
 
+    @Inject
+    TodoEntityStorage storage;
+
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(true);
         TodoEntityStorage storage = (TodoEntityStorage)session.getAttribute(TodoEntityStorage.class.getName());
 
         if (null == storage) {
-            storage = new TodoEntityStorage();
+            storage = this.storage;
 
-            session.setAttribute(TodoEntityStorage.class.getName(), storage);
+            session.setAttribute(TodoEntityStorage.class.getName(), this.storage);
         }
 
         try {
             OData odata = OData.newInstance();
             ServiceMetadata edm = odata.createServiceMetadata(new TodoEdmProvider(), new ArrayList<>());
-
             ODataHttpHandler handler = odata.createHandler(edm);
 
             handler.register(new TodoEntityCollectionProcessor(storage));

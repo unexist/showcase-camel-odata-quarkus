@@ -24,11 +24,15 @@ import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Locale;
 
 public class Util {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
+
     public static EdmEntitySet getEdmEntitySet(UriInfoResource uriInfo) throws ODataApplicationException {
 
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
@@ -47,20 +51,21 @@ public class Util {
     public static Entity findEntity(EdmEntityType edmEntityType,
                                     EntityCollection rt_entitySet, List<UriParameter> keyParams)
             throws ODataApplicationException {
+        Entity retVal = null;
 
         List<Entity> entityList = rt_entitySet.getEntities();
 
         // loop over all entities in order to find that one that matches all keys in request
         // an example could be e.g. contacts(ContactID=1, CompanyID=1)
         for(Entity rt_entity : entityList){
-            boolean foundEntity = entityMatchesAllKeys(edmEntityType, rt_entity, keyParams);
+            if(entityMatchesAllKeys(edmEntityType, rt_entity, keyParams)){
+                retVal = rt_entity;
 
-            if(foundEntity){
-                return rt_entity;
+                break;
             }
         }
 
-        return null;
+        return retVal;
     }
 
     public static boolean entityMatchesAllKeys(EdmEntityType edmEntityType, Entity rt_entity,  List<UriParameter> keyParams)
