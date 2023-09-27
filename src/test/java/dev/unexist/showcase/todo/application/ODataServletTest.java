@@ -83,7 +83,7 @@ public class ODataServletTest {
     public void shouldNotFindAnything() {
         String jsonOut = given()
                 .when()
-                 .accept(ContentType.JSON)
+                    .accept(ContentType.JSON)
                     .get("/odata/Products")
                 .then()
                     .statusCode(404)
@@ -95,5 +95,57 @@ public class ODataServletTest {
                 .inPath("$.[\"error\"].message")
                     .isString()
                     .startsWith("Cannot find EntitySet");
+    }
+
+    @Test
+    public void shouldFindOnlySingleMatch() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createTodo())
+                    .post("/todo")
+                .then()
+                    .statusCode(201);
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(1)")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.[\"ID\"]")
+                .isEqualTo(1);
+    }
+
+    @Test
+    public void shouldFindMatchByKey() {
+        given()
+                .when()
+                   .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createTodo())
+                    .post("/todo")
+                .then()
+                    .statusCode(201);
+
+        String jsonOut = given()
+                .when()
+                .accept(ContentType.JSON)
+                .get("/odata/Todos(ID=1)")
+                .then()
+                .statusCode(200)
+                .and()
+                .extract()
+                .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.[\"ID\"]")
+                .isEqualTo(1);
     }
 }
