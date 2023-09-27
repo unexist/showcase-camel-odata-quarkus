@@ -30,6 +30,7 @@
         <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
         <olingo.version>4.9.0</olingo.version>
         <json-unit-assertj.version>3.2.2</json-unit-assertj.version>
+        <xmlunit-assertj.version>2.9.1</xmlunit-assertj.version>
     </properties>
 
     <licenses>
@@ -148,6 +149,12 @@
             <groupId>net.javacrumbs.json-unit</groupId>
             <artifactId>json-unit-assertj</artifactId>
             <version>${json-unit-assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-assertj</artifactId>
+            <version>${xmlunit-assertj.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

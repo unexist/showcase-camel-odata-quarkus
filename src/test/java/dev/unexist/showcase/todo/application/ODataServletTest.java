@@ -18,13 +18,31 @@ import org.slf4j.LoggerFactory;
 
 import static io.restassured.RestAssured.given;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 @QuarkusTest
 public class ODataServletTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ODataServletTest.class);
 
     @Test
-    public void shouldGetOverview() {
+    public void shouldGetOverviewXML() {
+        String xmlOut = given()
+                .when()
+                    .accept(ContentType.XML)
+                    .get("/odata/")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        LOGGER.info(xmlOut);
+
+        assertThat(xmlOut).hasXPath("//a:feed/@m:context");
+    }
+
+    @Test
+    public void shouldGetOverviewJSON() {
         String jsonOut = given()
                 .when()
                   .accept(ContentType.JSON)
@@ -127,7 +145,7 @@ public class ODataServletTest {
     public void shouldFindMatchByKey() {
         given()
                 .when()
-                   .accept(ContentType.JSON)
+                    .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
                     .body(TodoFixture.createTodo())
                     .post("/todo")
