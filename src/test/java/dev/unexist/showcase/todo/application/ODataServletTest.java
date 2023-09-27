@@ -136,13 +136,13 @@ public class ODataServletTest {
 
         String jsonOut = given()
                 .when()
-                .accept(ContentType.JSON)
-                .get("/odata/Todos(ID=1)")
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(ID=1)")
                 .then()
-                .statusCode(200)
+                    .statusCode(200)
                 .and()
-                .extract()
-                .asString();
+                    .extract()
+                    .asString();
 
         assertThatJson(jsonOut)
                 .inPath("$.[\"ID\"]")
