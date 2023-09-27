@@ -1,7 +1,7 @@
 /**
  * @package Showcase-OData-Quarkus
  *
- * @file Todo OData resource
+ * @file Todo OData EDM provider
  * @copyright 2023-present Christoph Kappel <christoph@unexist.dev>
  * @version $Id$
  *
@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class TodoEdmProvider extends CsdlAbstractEdmProvider {
-    public static final String NAMESPACE = "OData.Demo";
+    public static final String NAMESPACE = "OData.Todo";
     public static final String CONTAINER_NAME = "Container";
     public static final String ET_TODO_NAME = "Todo";
     public static final String ES_TODOS_NAME = "Todos";

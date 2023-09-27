@@ -1,6 +1,7 @@
 /**
- * @package Showcase
- * @file
+ * @package Showcase-OData-Quarkus
+ *
+ * @file OData todo primitive processor
  * @copyright 2023-present Christoph Kappel <christoph@unexist.dev>
  * @version $Id$
  *
