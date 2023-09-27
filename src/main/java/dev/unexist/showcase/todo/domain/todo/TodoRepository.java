@@ -13,6 +13,7 @@ package dev.unexist.showcase.todo.domain.todo;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public interface TodoRepository {
 
@@ -63,4 +64,14 @@ public interface TodoRepository {
      **/
 
     Optional<Todo> findById(int id);
+
+    /**
+     * Find {@link Todo} by given {@link Predicate}
+     *
+     * @param  filterBy  A {@link Predicate} to use
+     *
+     * @return A {@link Optional} with the result of the lookup
+     **/
+
+    Optional<Todo> findByPredicate(Predicate<Todo> filterBy);
 }
