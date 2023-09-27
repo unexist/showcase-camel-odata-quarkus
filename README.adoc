@@ -10,3 +10,4 @@ This project holds a showcase for OData related things.
 - https://github.com/quarkusio/quarkus/issues/8228
 - https://rashmini.medium.com/quarkus-creating-a-web-xml-based-servlet-application-with-filtering-98c335987b20
 - https://github.com/gopinnath/servlet-example/blob/main/src/main/java/org/gopinnath/GreetingServlet.java
+- https://archive.apache.org/dist/olingo/odata4/Tutorials/
