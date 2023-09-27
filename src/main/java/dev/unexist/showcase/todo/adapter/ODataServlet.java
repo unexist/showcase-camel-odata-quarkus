@@ -45,7 +45,7 @@ public class ODataServlet extends HttpServlet {
         if (null == storage) {
             storage = this.storage;
 
-            session.setAttribute(TodoEntityStorage.class.getName(), this.storage);
+            session.setAttribute(TodoEntityStorage.class.getName(), storage);
         }
 
         try {

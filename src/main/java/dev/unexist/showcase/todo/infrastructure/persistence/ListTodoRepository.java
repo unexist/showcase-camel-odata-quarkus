@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @ApplicationScoped
 @Named("todo_list")
@@ -84,6 +85,13 @@ public class ListTodoRepository implements TodoRepository {
     public Optional<Todo> findById(int id) {
         return this.list.stream()
                 .filter(t -> t.getId() == id)
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Todo> findByPredicate(Predicate<Todo> filterBy) {
+        return this.list.stream()
+                .filter(filterBy)
                 .findFirst();
     }
 }
