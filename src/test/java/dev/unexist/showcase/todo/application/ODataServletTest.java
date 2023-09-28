@@ -166,4 +166,31 @@ public class ODataServletTest {
                 .inPath("$.[\"ID\"]")
                 .isEqualTo(1);
     }
+
+
+    @Test
+    public void shouldGetAttributeID() {
+        given()
+                .when()
+                  .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createTodo())
+                    .post("/todo")
+                .then()
+                    .statusCode(201);
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(ID=1)/ID")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.value")
+                .isEqualTo(1);
+    }
 }
