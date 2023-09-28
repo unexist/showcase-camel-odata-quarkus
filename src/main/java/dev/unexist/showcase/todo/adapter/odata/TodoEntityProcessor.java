@@ -46,9 +46,22 @@ public class TodoEntityProcessor implements EntityProcessor {
     private ServiceMetadata serviceMetadata;
     private TodoEntityStorage storage;
 
+    /**
+     * Constructor
+     *
+     * @param  storage  A {@link TodoEntityStorage} instance
+     **/
+
     public TodoEntityProcessor(TodoEntityStorage storage) {
         this.storage = storage;
     }
+
+    /**
+     * Init this object
+     *
+     * @param  odata            a {@link OData} instance
+     * @param  serviceMetadata  A {@link ServiceMetadata} instance
+     **/
 
     public void init(OData odata, ServiceMetadata serviceMetadata) {
         this.odata = odata;

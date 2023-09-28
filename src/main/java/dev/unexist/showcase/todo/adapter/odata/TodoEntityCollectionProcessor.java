@@ -39,37 +39,47 @@ public class TodoEntityCollectionProcessor implements org.apache.olingo.server.a
     private OData odata;
     private ServiceMetadata serviceMetadata;
 
+    /**
+     * Constructor
+     *
+     * @param  storage  A {@link TodoEntityStorage} instance
+     **/
+
     public TodoEntityCollectionProcessor(TodoEntityStorage storage) {
         this.storage = storage;
     }
 
-    // our processor is initialized with the OData context object
-    public void init(OData initOdata, ServiceMetadata initServiceMetadata) {
-        this.odata = initOdata;
-        this.serviceMetadata = initServiceMetadata;
+    /**
+     * Init this object
+     *
+     * @param  odata            a {@link OData} instance
+     * @param  serviceMetadata  A {@link ServiceMetadata} instance
+     **/
+
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+        this.odata = odata;
+        this.serviceMetadata = serviceMetadata;
     }
 
-    // the only method that is declared in the TodoEntityCollectionProcessor interface
+    // The only method that is declared in the TodoEntityCollectionProcessor interface
     // this method is called, when the user fires a request to an EntitySet
-    // in our example, the URL would be:
-    // http://localhost:8080/ExampleService1/ExampleServlet1.svc/Products
+    // in our example
     public void readEntityCollection(ODataRequest request, ODataResponse response,
                                      UriInfo uriInfo, ContentType requestFormat)
             throws SerializerException, ODataApplicationException {
 
-        // 1st retrieve the requested EntitySet from the uriInfo (representation of the parsed URI)
+        /* 1st retrieve the requested EntitySet from the uriInfo (representation of the parsed URI) */
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-        // in our example, the first segment is the EntitySet
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
         EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 
-        // 2nd: fetch the data from backend for this requested EntitySetName and deliver as EntitySet
+        /* 2nd: fetch the data from backend for this requested EntitySetName and deliver as EntitySet */
         EntityCollection entityCollection = storage.readEntitySetData(edmEntitySet);
 
-        // 3rd: create a serializer based on the requested format (json)
+        /* 3rd: create a serializer based on the requested format (json) */
         ODataSerializer serializer = odata.createSerializer(requestFormat);
 
-        // 4th: Now serialize the content: transform from the EntitySet object to InputStream
+        /* 4th: Now serialize the content: transform from the EntitySet object to InputStream */
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
         ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
 
@@ -79,7 +89,7 @@ public class TodoEntityCollectionProcessor implements org.apache.olingo.server.a
         SerializerResult serializedContent = serializer.entityCollection(serviceMetadata,
                 edmEntityType, entityCollection, opts);
 
-        // Finally: configure the response object: set the body, headers and status code
+        /* Finally: configure the response object: set the body, headers and status code */
         response.setContent(serializedContent.getContent());
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, requestFormat.toContentTypeString());

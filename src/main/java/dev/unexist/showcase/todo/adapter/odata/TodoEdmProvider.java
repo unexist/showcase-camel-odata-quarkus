@@ -57,7 +57,6 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
     public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) {
         CsdlEntityType retVal = null;
 
-        // this method is called for one of the EntityTypes that are configured in the Schema
         if (ET_TODO_FQN.equals(entityTypeName)) {
             CsdlProperty id = new CsdlProperty()
                     .setName("ID")
@@ -69,11 +68,11 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
                     .setName("Description")
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
-            // create CsdlPropertyRef for Key element
+            /* Create CsdlPropertyRef for Key element */
             CsdlPropertyRef propertyRef = new CsdlPropertyRef();
             propertyRef.setName("ID");
 
-            // configure EntityType
+            /* Configure EntityType */
             CsdlEntityType entityType = new CsdlEntityType();
 
             entityType.setName(ET_TODO_NAME);
@@ -121,7 +120,7 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
     public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) {
         CsdlEntityContainerInfo retVal = null;
 
-        // This method is invoked when displaying the service document at e.g. http://localhost:8080/DemoService/DemoService.svc
+        // This method is invoked when displaying the service document */
         if (null == entityContainerName || CONTAINER.equals(entityContainerName)) {
             CsdlEntityContainerInfo entityContainerInfo = new CsdlEntityContainerInfo();
             entityContainerInfo.setContainerName(CONTAINER);

@@ -46,9 +46,22 @@ public class TodoPrimitiveProcessor implements PrimitiveProcessor {
     private TodoEntityStorage storage;
     private ServiceMetadata serviceMetadata;
 
+    /**
+     * Constructor
+     *
+     * @param  storage  A {@link TodoEntityStorage} instance
+     **/
+
     public TodoPrimitiveProcessor(TodoEntityStorage storage) {
         this.storage = storage;
     }
+
+    /**
+     * Init this object
+     *
+     * @param  odata            a {@link OData} instance
+     * @param  serviceMetadata  A {@link ServiceMetadata} instance
+     **/
 
     public void init(OData odata, ServiceMetadata serviceMetadata) {
         this.odata = odata;
@@ -60,56 +73,55 @@ public class TodoPrimitiveProcessor implements PrimitiveProcessor {
                               UriInfo uriInfo, ContentType contentType)
             throws ODataApplicationException, ODataLibraryException {
 
-        // 1. Retrieve info from URI
-        // 1.1. retrieve the info about the requested entity set
+        /* 1. Retrieve info from URI */
+        /* 1.1. retrieve the info about the requested entity set */
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
-        // Note: only in our example we can rely that the first segment is the EntitySet
+        /* Note: only in our example we can rely that the first segment is the EntitySet */
         UriResourceEntitySet uriEntityset = (UriResourceEntitySet) resourceParts.get(0);
         EdmEntitySet edmEntitySet = uriEntityset.getEntitySet();
-        // the key for the entity
+        /* The key for the entity */
         List<UriParameter> keyPredicates = uriEntityset.getKeyPredicates();
 
-        // 1.2. retrieve the requested (Edm) property
-        // the last segment is the Property
+        /* 1.2. retrieve the requested (Edm) property */
+        /* The last segment is the Property */
         UriResourceProperty uriProperty = (UriResourceProperty) resourceParts.get(resourceParts.size() -1);
         EdmProperty edmProperty = uriProperty.getProperty();
         String edmPropertyName = edmProperty.getName();
-        // in our example, we know we have only primitive types in our model
+        /* in our example, we know we have only primitive types in our model */
         EdmPrimitiveType edmPropertyType = (EdmPrimitiveType) edmProperty.getType();
 
-        // 2. retrieve data from backend
-        // 2.1. retrieve the entity data, for which the property has to be read
+        // 2. Retrieve data from backend
+        /* 2.1. Retrieve the entity data, for which the property has to be read */
         Entity entity = storage.readEntityData(edmEntitySet, keyPredicates);
         if (entity == null) { // Bad request
             throw new ODataApplicationException("Entity not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
-        // 2.2. retrieve the property data from the entity
+        /* 2.2. retrieve the property data from the entity */
         Property property = entity.getProperty(edmPropertyName);
         if (property == null) {
             throw new ODataApplicationException("Property not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
-        // 3. serialize
+        /* 3. Serialize */
         Object value = property.getValue();
-        if (value != null) {
-            // 3.1. configure the serializer
+        if (null != value) {
+            /* 3.1. Configure the serializer */
             ODataSerializer serializer = odata.createSerializer(contentType);
 
             ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).navOrPropertyPath(edmPropertyName).build();
             PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
-            // 3.2. serialize
+            /* 3.2. Serialize */
             SerializerResult serializerResult = serializer.primitive(serviceMetadata, edmPropertyType, property, options);
             InputStream propertyStream = serializerResult.getContent();
 
-            //4. configure the response object
+            /* 4. Configure the response object */
             response.setContent(propertyStream);
             response.setStatusCode(HttpStatusCode.OK.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, contentType.toContentTypeString());
         }else{
-            // in case there's no value for the property, we can skip the serialization
             response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
         }
     }
