@@ -338,7 +338,7 @@ public class TodoEntityStorage {
     private Entity createEntity(Todo todo) {
         Entity entity = new Entity()
                 .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, todo.getId()))
-                .addProperty(new Property(null, "Name", ValueType.PRIMITIVE, todo.getTitle()))
+                .addProperty(new Property(null, "Title", ValueType.PRIMITIVE, todo.getTitle()))
                 .addProperty(new Property(null, "Description", ValueType.PRIMITIVE, todo.getDescription()));
 
         entity.setId(createId("Todos", todo.getId()));
