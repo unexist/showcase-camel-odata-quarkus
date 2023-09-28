@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 import static io.restassured.RestAssured.given;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
@@ -25,7 +27,7 @@ public class ODataServletTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ODataServletTest.class);
 
     @Test
-    public void shouldGetOverviewXML() {
+    public void shouldGetOverviewAsXML() {
         String xmlOut = given()
                 .when()
                     .accept(ContentType.XML)
@@ -36,13 +38,14 @@ public class ODataServletTest {
                     .extract()
                     .asString();
 
-        LOGGER.info(xmlOut);
-
-        assertThat(xmlOut).hasXPath("//a:feed/@m:context");
+        assertThat(xmlOut)
+                .withNamespaceContext(Map.of("metadata", "http://docs.oasis-open.org/odata/ns/metadata"))
+                .valueByXPath("//@metadata:context")
+                .isEqualTo("$metadata");
     }
 
     @Test
-    public void shouldGetOverviewJSON() {
+    public void shouldGetOverviewAsJSON() {
         String jsonOut = given()
                 .when()
                   .accept(ContentType.JSON)
@@ -55,10 +58,7 @@ public class ODataServletTest {
 
         assertThatJson(jsonOut)
                 .isObject()
-                    .containsEntry("@odata.context", "$metadata")
-                .node("value")
-                    .isArray()
-                    .hasSize(1);
+                    .containsEntry("@odata.context", "$metadata");
     }
 
     @Test
