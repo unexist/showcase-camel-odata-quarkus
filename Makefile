@@ -29,8 +29,11 @@ od-all:
 od-first:
 	curl -v http://localhost:8080/odata/Todos\(1\) | jq .
 
-od-first-name:
-	curl -v http://localhost:8080/odata/Todos\(ID=1\)/Name | jq .
+od-first-title:
+	curl -v http://localhost:8080/odata/Todos\(ID=1\)/Title | jq .
 
 od-first-descr:
 	curl -v http://localhost:8080/odata/Todos\(ID=1\)/Description | jq .
+
+od-create:
+	curl -v -X POST --json '{"Title":"test", "Description":"test"}' http://localhost:8080/odata/Todos | jq .
