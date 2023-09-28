@@ -10,6 +10,7 @@
 
 package dev.unexist.showcase.todo.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
@@ -192,5 +193,24 @@ public class ODataServletTest {
         assertThatJson(jsonOut)
                 .inPath("$.value")
                 .isEqualTo(1);
+    }
+
+    @Test
+    public void shouldCreateNewEntity() throws JsonProcessingException {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createEntityJSON())
+                    .post("/odata/Todos")
+                .then()
+                    .statusCode(201)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .isObject()
+                .containsEntry("@odata.context", "$metadata#Todos");
     }
 }
