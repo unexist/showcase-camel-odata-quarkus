@@ -11,3 +11,9 @@ This project holds a showcase for OData related things.
 - https://rashmini.medium.com/quarkus-creating-a-web-xml-based-servlet-application-with-filtering-98c335987b20
 - https://github.com/gopinnath/servlet-example/blob/main/src/main/java/org/gopinnath/GreetingServlet.java
 - https://archive.apache.org/dist/olingo/odata4/Tutorials/
+
+== jsonPath/xmlPath
+
+- https://lzone.de/cheat-sheet/JSONPath
+- https://www.videlibri.de/cgi-bin/xidelcgi
+- https://www.xmlunit.org/api/java/2.7.0/org/xmlunit/assertj/XmlAssert.html
