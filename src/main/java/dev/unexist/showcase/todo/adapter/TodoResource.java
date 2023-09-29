@@ -11,6 +11,9 @@
 
 package dev.unexist.showcase.todo.adapter;
 
+import dev.unexist.showcase.todo.domain.task.Task;
+import dev.unexist.showcase.todo.domain.task.TaskBase;
+import dev.unexist.showcase.todo.domain.task.TaskService;
 import dev.unexist.showcase.todo.domain.todo.Todo;
 import dev.unexist.showcase.todo.domain.todo.TodoBase;
 import dev.unexist.showcase.todo.domain.todo.TodoService;
@@ -45,6 +48,9 @@ public class TodoResource {
 
     @Inject
     TodoService todoService;
+
+    @Inject
+    TaskService taskService;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -159,6 +165,39 @@ public class TodoResource {
             builder = Response.noContent();
         } else {
             builder = Response.status(Response.Status.NOT_FOUND);
+        }
+
+        return builder.build();
+    }
+
+    @POST
+    @Path("{id}/task")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Create new task to given todo")
+    @Tag(name = "Todo")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Todo found", content =
+                @Content(schema = @Schema(implementation = Task.class))),
+            @APIResponse(responseCode = "404", description = "Task not found"),
+            @APIResponse(responseCode = "500", description = "Server error")
+    })
+    public Response createTask(TaskBase taskBase, @PathParam("id") int id, @Context UriInfo uriInfo) {
+        Response.ResponseBuilder builder;
+
+        Optional<Todo> todo = this.todoService.findById(id);
+
+        if (todo.isPresent()) {
+            URI uri = uriInfo.getAbsolutePathBuilder()
+                    .path(Integer.toString(todo.get().getId()))
+                    .build();
+
+            Optional<Task> task = this.taskService.create(taskBase);
+
+            task.ifPresent(value -> value.setTodoId(todo.get().getId()));
+
+            builder = Response.created(uri);
+        } else {
+            builder = Response.status(Response.Status.NOT_ACCEPTABLE);
         }
 
         return builder.build();

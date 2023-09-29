@@ -11,6 +11,8 @@
 
 package dev.unexist.showcase.todo.domain.todo;
 
+import dev.unexist.showcase.todo.domain.CrudRepository;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.Optional;
 public class TodoService {
 
     @Inject
-    TodoRepository todoRepository;
+    CrudRepository<Todo> todoRepository;
 
     /**
      * Create new {@link Todo} entry and store it in repository

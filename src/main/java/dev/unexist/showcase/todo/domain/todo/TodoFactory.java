@@ -37,7 +37,6 @@ public class TodoFactory {
         todo.setId(id);
         todo.setTitle(title);
         todo.setDescription(description);
-        todo.setDone(isDone);
 
         DueDate dueDate = new DueDate();
 

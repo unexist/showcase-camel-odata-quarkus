@@ -25,8 +25,6 @@ public class TodoBase {
     @NotBlank
     private String description;
 
-    private Boolean done;
-
     private DueDate dueDate;
 
     /**
@@ -68,26 +66,6 @@ public class TodoBase {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * Get done state of entry
-     *
-     * @return Done state of the entry
-     **/
-
-    public Boolean getDone() {
-        return done;
-    }
-
-    /**
-     * Set done state of entry
-     *
-     * @param  done  Done state of the entry
-     **/
-
-    public void setDone(Boolean done) {
-        this.done = done;
     }
 
     /**
