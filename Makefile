@@ -4,19 +4,37 @@ curl -X 'POST' \
   -H 'accept: */*' \
   -H 'Content-Type: application/json' \
   -d '{
-  "description": "string",
-  "done": true,
-  "title": "string"
+  "description": "Todo string",
+  "title": "Todo string"
 }'
 endef
 export JSON_TODO
+
+define JSON_TASK
+curl -X 'POST' \
+  'http://localhost:8080/todo/1/task' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "description": "Task string",
+  "done": true,
+  "title": "Task string"
+}'
+endef
+export JSON_TASK
 
 # Tools
 todo:
 	@echo $$JSON_TODO | bash
 
-list:
+task:
+	@echo $$JSON_TASK | bash
+
+todo_list:
 	@curl -X 'GET' 'http://localhost:8080/todo' -H 'accept: */*' | jq .
+
+task_list:
+	@curl -X 'GET' 'http://localhost:8080/todo/1/task' -H 'accept: */*' | jq .
 
 
 # Odata
