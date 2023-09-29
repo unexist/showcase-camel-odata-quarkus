@@ -251,6 +251,26 @@ public class ODataServletTest {
                 .isEqualTo("");
     }
 
+    @Test
+    public void shouldGetNavigationEntities() {
+        createTodo();
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .delete("/odata/Todos(1)/Tasks")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.value")
+                .isArray()
+                .isNotEmpty();
+    }
+
     /**
      * Create an entry via REST
      **/
