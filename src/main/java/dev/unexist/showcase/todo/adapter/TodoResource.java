@@ -62,7 +62,7 @@ public class TodoResource {
             @APIResponse(responseCode = "406", description = "Bad data"),
             @APIResponse(responseCode = "500", description = "Server error")
     })
-    public Response create(TodoBase todoBase, @Context UriInfo uriInfo) {
+    public Response createTodo(TodoBase todoBase, @Context UriInfo uriInfo) {
         Response.ResponseBuilder builder;
 
         Optional<Todo> todo = this.todoService.create(todoBase);
@@ -90,7 +90,7 @@ public class TodoResource {
             @APIResponse(responseCode = "204", description = "Nothing found"),
             @APIResponse(responseCode = "500", description = "Server error")
     })
-    public Response getAll() {
+    public Response getAllTodos() {
         List<Todo> todoList = this.todoService.getAll();
 
         Response.ResponseBuilder builder;
@@ -105,7 +105,7 @@ public class TodoResource {
     }
 
     @GET
-    @Path("{id}")
+    @Path("{todoId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get todo by id")
     @Tag(name = "Todo")
@@ -115,8 +115,8 @@ public class TodoResource {
             @APIResponse(responseCode = "404", description = "Todo not found"),
             @APIResponse(responseCode = "500", description = "Server error")
     })
-    public Response findById(@PathParam("id") int id) {
-        Optional<Todo> result = this.todoService.findById(id);
+    public Response findTodoById(@PathParam("todoId") int todoId) {
+        Optional<Todo> result = this.todoService.findById(todoId);
 
         Response.ResponseBuilder builder;
 
@@ -130,7 +130,7 @@ public class TodoResource {
     }
 
     @PUT
-    @Path("{id}")
+    @Path("{todoId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update todo by id")
@@ -140,10 +140,10 @@ public class TodoResource {
             @APIResponse(responseCode = "404", description = "Todo not found"),
             @APIResponse(responseCode = "500", description = "Server error")
     })
-    public Response update(@PathParam("id") int id, TodoBase base) {
+    public Response updateTodo(@PathParam("todoId") int todoId, TodoBase base) {
         Response.ResponseBuilder builder;
 
-        if (this.todoService.update(id, base)) {
+        if (this.todoService.update(todoId, base)) {
             builder = Response.noContent();
         } else {
             builder = Response.status(Response.Status.NOT_FOUND);
@@ -153,15 +153,15 @@ public class TodoResource {
     }
 
     @DELETE
-    @Path("{id}")
+    @Path("{todoId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Delete todo by id")
     @Tag(name = "Todo")
-    public Response delete(@PathParam("id") int id, TodoBase base) {
+    public Response deleteTodo(@PathParam("todoId") int todoId, TodoBase base) {
         Response.ResponseBuilder builder;
 
-        if (this.todoService.delete(id)) {
+        if (this.todoService.delete(todoId)) {
             builder = Response.noContent();
         } else {
             builder = Response.status(Response.Status.NOT_FOUND);
@@ -171,20 +171,19 @@ public class TodoResource {
     }
 
     @POST
-    @Path("{id}/task")
+    @Path("{todoId}/task")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Create new task to given todo")
-    @Tag(name = "Todo")
+    @Tag(name = "Task")
     @APIResponses({
-            @APIResponse(responseCode = "200", description = "Todo found", content =
-                @Content(schema = @Schema(implementation = Task.class))),
-            @APIResponse(responseCode = "404", description = "Task not found"),
+            @APIResponse(responseCode = "201", description = "Task created"),
+            @APIResponse(responseCode = "404", description = "Todo not found"),
             @APIResponse(responseCode = "500", description = "Server error")
     })
-    public Response createTask(TaskBase taskBase, @PathParam("id") int id, @Context UriInfo uriInfo) {
+    public Response createTask(TaskBase taskBase, @PathParam("todoId") int todoId, @Context UriInfo uriInfo) {
         Response.ResponseBuilder builder;
 
-        Optional<Todo> todo = this.todoService.findById(id);
+        Optional<Todo> todo = this.todoService.findById(todoId);
 
         if (todo.isPresent()) {
             URI uri = uriInfo.getAbsolutePathBuilder()
@@ -197,7 +196,99 @@ public class TodoResource {
 
             builder = Response.created(uri);
         } else {
-            builder = Response.status(Response.Status.NOT_ACCEPTABLE);
+            builder = Response.status(Response.Status.NOT_FOUND);
+        }
+
+        return builder.build();
+    }
+
+    @GET
+    @Path("{todoId}/task")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get all tasks")
+    @Tag(name = "Task")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "List of task", content =
+                @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = Task.class))),
+            @APIResponse(responseCode = "204", description = "Nothing found"),
+            @APIResponse(responseCode = "500", description = "Server error")
+    })
+    public Response getAllTasks(@PathParam("todoId") int todoId) {
+        List<Task> taskList = this.taskService.getAll();
+
+        Response.ResponseBuilder builder;
+
+        if (taskList.isEmpty()) {
+            builder = Response.noContent();
+        } else {
+            builder = Response.ok(Entity.json(taskList));
+        }
+
+        return builder.build();
+    }
+
+    @GET
+    @Path("{todoId}/task/{taskId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get task by id")
+    @Tag(name = "Task")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Task found", content =
+                @Content(schema = @Schema(implementation = Task.class))),
+            @APIResponse(responseCode = "404", description = "Task not found"),
+            @APIResponse(responseCode = "500", description = "Server error")
+    })
+    public Response findTaskById(@PathParam("todoId") int todoId, @PathParam("taskId") int taskId) {
+        Optional<Task> result = this.taskService.findById(taskId);
+
+        Response.ResponseBuilder builder;
+
+        if (result.isPresent()) {
+            builder = Response.ok(Entity.json(result.get()));
+        } else {
+            builder = Response.status(Response.Status.NOT_FOUND);
+        }
+
+        return builder.build();
+    }
+
+
+    @PUT
+    @Path("{todoId}/task/{taskId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update todo by id")
+    @Tag(name = "Task")
+    @APIResponses({
+            @APIResponse(responseCode = "204", description = "Task updated"),
+            @APIResponse(responseCode = "404", description = "Task not found"),
+            @APIResponse(responseCode = "500", description = "Server error")
+    })
+    public Response updateTask(@PathParam("todoId") int todoId, @PathParam("taskId") int taskId, TaskBase base) {
+        Response.ResponseBuilder builder;
+
+        if (this.taskService.update(taskId, base)) {
+            builder = Response.noContent();
+        } else {
+            builder = Response.status(Response.Status.NOT_FOUND);
+        }
+
+        return builder.build();
+    }
+
+    @DELETE
+    @Path("{todoId}/task/{taskId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Delete task by id")
+    @Tag(name = "Task")
+    public Response deleteTask(@PathParam("todoId") int todoId, @PathParam("taskId") int taskId) {
+        Response.ResponseBuilder builder;
+
+        if (this.taskService.delete(taskId)) {
+            builder = Response.noContent();
+        } else {
+            builder = Response.status(Response.Status.NOT_FOUND);
         }
 
         return builder.build();
