@@ -118,14 +118,7 @@ public class ODataServletTest {
 
     @Test
     public void shouldFindOnlySingleMatch() {
-        given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(TodoFixture.createTodo())
-                    .post("/todo")
-                .then()
-                    .statusCode(201);
+        createTodo();
 
         String jsonOut = given()
                 .when()
@@ -144,14 +137,7 @@ public class ODataServletTest {
 
     @Test
     public void shouldFindMatchByKey() {
-        given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(TodoFixture.createTodo())
-                    .post("/todo")
-                .then()
-                    .statusCode(201);
+        createTodo();
 
         String jsonOut = given()
                 .when()
@@ -171,14 +157,7 @@ public class ODataServletTest {
 
     @Test
     public void shouldGetAttributeID() {
-        given()
-                .when()
-                  .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(TodoFixture.createTodo())
-                    .post("/todo")
-                .then()
-                    .statusCode(201);
+        createTodo();
 
         String jsonOut = given()
                 .when()
@@ -212,5 +191,78 @@ public class ODataServletTest {
         assertThatJson(jsonOut)
                 .isObject()
                 .containsEntry("@odata.context", "$metadata#Todos");
+    }
+
+    @Test
+    public void shouldUpdateAllProperties() throws JsonProcessingException {
+        createTodo();
+
+        String jsonOut = given()
+                .when()
+                  .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createEntityJSON())
+                    .patch("/odata/Todos(1)")
+                .then()
+                    .statusCode(204)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .isEqualTo("");
+    }
+
+    @Test
+    public void shouldUpdateSingleProperty() throws JsonProcessingException {
+        createTodo();
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createEntityJSON())
+                    .put("/odata/Todos(1)")
+                .then()
+                    .statusCode(204)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .isEqualTo("");
+    }
+
+    @Test
+    public void shouldDeleteEntity() {
+        createTodo();
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .delete("/odata/Todos(1)")
+                .then()
+                    .statusCode(204)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .isEqualTo("");
+    }
+
+    /**
+     * Create an entry via REST
+     **/
+
+    private static void createTodo() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createTodo())
+                    .post("/todo")
+                .then()
+                    .statusCode(201);
     }
 }
