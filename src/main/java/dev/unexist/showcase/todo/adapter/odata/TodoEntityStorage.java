@@ -11,8 +11,8 @@
 
 package dev.unexist.showcase.todo.adapter.odata;
 
+import dev.unexist.showcase.todo.domain.CrudRepository;
 import dev.unexist.showcase.todo.domain.todo.Todo;
-import dev.unexist.showcase.todo.domain.todo.TodoRepository;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
@@ -44,7 +44,7 @@ public class TodoEntityStorage {
     private static final Logger LOGGER = LoggerFactory.getLogger(TodoEntityStorage.class);
 
     @Inject
-    TodoRepository repository;
+    CrudRepository<Todo> todoRepository;
 
     /**
      * Read data from an entity collection
@@ -156,7 +156,7 @@ public class TodoEntityStorage {
     private EntityCollection getTodos() {
         EntityCollection entityCollection = new EntityCollection();
 
-        for (Todo todo : this.repository.getAll()) {
+        for (Todo todo : this.todoRepository.getAll()) {
             entityCollection.getEntities().add(createEntity(todo));
         }
 
@@ -197,7 +197,7 @@ public class TodoEntityStorage {
     private Entity createTodo(EdmEntityType edmEntityType, Entity entity) {
         Todo todo = new Todo();
 
-        this.repository.add(todo);
+        this.todoRepository.add(todo);
 
         entity.getProperties().add(new Property(null, "ID", ValueType.PRIMITIVE, todo.getId()));
 
@@ -270,7 +270,7 @@ public class TodoEntityStorage {
 
         Integer existingID = (Integer)todoEntity.getProperty("ID").getValue();
 
-        this.repository.deleteById(existingID);
+        this.todoRepository.deleteById(existingID);
     }
 
     /**
@@ -287,7 +287,7 @@ public class TodoEntityStorage {
             throws ODataApplicationException {
         Entity retVal = null;
 
-        for (Todo todo : this.repository.getAll()) {
+        for (Todo todo : this.todoRepository.getAll()) {
             Entity todoEntity = createEntity(todo);
 
             if (entityMatchesAllKeys(edmEntityType, todoEntity, keyParams)) {
