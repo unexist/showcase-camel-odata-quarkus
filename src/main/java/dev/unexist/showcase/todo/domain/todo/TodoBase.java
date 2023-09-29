@@ -88,9 +88,5 @@ public class TodoBase {
         Objects.requireNonNull(dueDate, "DueDate cannot be null");
 
         this.dueDate = dueDate;
-
-        if (null != dueDate.getStart() && null != dueDate.getDue()) {
-            this.done = dueDate.getStart().isBefore(dueDate.getDue());
-        }
     }
 }
