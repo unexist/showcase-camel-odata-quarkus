@@ -11,13 +11,12 @@
 
 package dev.unexist.showcase.todo.infrastructure.persistence;
 
+import dev.unexist.showcase.todo.domain.CrudRepository;
 import dev.unexist.showcase.todo.domain.todo.Todo;
-import dev.unexist.showcase.todo.domain.todo.TodoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,8 +24,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 @ApplicationScoped
-@Named("todo_list")
-public class ListTodoRepository implements TodoRepository {
+public class ListTodoRepository implements CrudRepository<Todo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ListTodoRepository.class);
 
     private final List<Todo> list;

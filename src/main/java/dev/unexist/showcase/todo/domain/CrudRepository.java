@@ -1,7 +1,7 @@
 /**
  * @package Showcase-OData-Quarkus
  *
- * @file Todo repository interface
+ * @file K repository interface
  * @copyright 2023-present Christoph Kappel <christoph@unexist.dev>
  * @version $Id$
  *
@@ -9,36 +9,36 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo.domain.todo;
+package dev.unexist.showcase.todo.domain;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public interface TodoRepository {
+public interface CrudRepository<K> {
 
     /**
-     * Add {@link Todo} entry to list
+     * Add {@link K} entry to list
      *
-     * @param  todo  {@link Todo} entry to add
+     * @param  k  {@link K} entry to add
      *
      * @return Either {@code true} on success; otherwise {@code false}
      **/
 
-    boolean add(Todo todo);
+    boolean add(K k);
 
     /**
-     * Update {@link Todo} with given id
+     * Update {@link K} with given id
      *
-     * @param  todo  A {@link Todo} to update
+     * @param  k  A {@link K} to update
      *
      * @return Either {@code true} on success; otherwise {@code false}
      **/
 
-    boolean update(Todo todo);
+    boolean update(K k);
 
     /**
-     * Delete {@link Todo} with given id
+     * Delete {@link K} with given id
      *
      * @param  id  Id to delete
      *
@@ -48,30 +48,30 @@ public interface TodoRepository {
     boolean deleteById(int id);
 
     /**
-     * Get all {@link Todo} entries
+     * Get all {@link K} entries
      *
-     * @return List of all stored {@link Todo}
+     * @return List of all stored {@link K}
      **/
 
-    List<Todo> getAll();
+    List<K> getAll();
 
     /**
-     * Find {@link Todo} by given id
+     * Find {@link K} by given id
      *
      * @param  id  Id to find
      *
      * @return A {@link Optional} with the result of the lookup
      **/
 
-    Optional<Todo> findById(int id);
+    Optional<K> findById(int id);
 
     /**
-     * Find {@link Todo} by given {@link Predicate}
+     * Find {@link K} by given {@link Predicate}
      *
      * @param  filterBy  A {@link Predicate} to use
      *
      * @return A {@link Optional} with the result of the lookup
      **/
 
-    Optional<Todo> findByPredicate(Predicate<Todo> filterBy);
+    Optional<K> findByPredicate(Predicate<K> filterBy);
 }
