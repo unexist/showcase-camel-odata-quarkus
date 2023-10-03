@@ -24,7 +24,7 @@ public class TaskFactory {
      * @return A newly created {@code Task}
      **/
 
-    public static Task createTaskFromData(int id, String title, String description, boolean isDone) {
+    public static Task fromData(int id, String title, String description, boolean isDone) {
         Task task = new Task();
 
         task.setId(id);

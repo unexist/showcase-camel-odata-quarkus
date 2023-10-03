@@ -23,15 +23,14 @@ public class TodoFactory {
      * @param  id            ID of the entry
      * @param  title         Title of the entry
      * @param  description   Description of the entry
-     * @param  isDone        Whether the entry is marked as done
      * @param  startDateStr  Start date string
      * @param  dueDateStr    Due date string
      *
      * @return A newly created {@code Todo}
      **/
 
-    public static Todo createTodoFromData(int id, String title, String description,
-                                          boolean isDone, String startDateStr, String dueDateStr) {
+    public static Todo fromData(int id, String title, String description,
+                                String startDateStr, String dueDateStr) {
         Todo todo = new Todo();
 
         todo.setId(id);

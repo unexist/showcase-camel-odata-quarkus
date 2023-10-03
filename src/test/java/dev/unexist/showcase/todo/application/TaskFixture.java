@@ -14,15 +14,13 @@ package dev.unexist.showcase.todo.application;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import dev.unexist.showcase.todo.domain.todo.Todo;
-import dev.unexist.showcase.todo.domain.todo.TodoFactory;
+import dev.unexist.showcase.todo.domain.task.Task;
+import dev.unexist.showcase.todo.domain.task.TaskFactory;
 
-public class TodoFixture {
-    private static final String DATE = "2021-05-07";
-
-    public static Todo createTodo() {
-        return TodoFactory.fromData(0,
-                "string", "string", DATE, DATE);
+public class TaskFixture {
+    public static Task createTask() {
+        return TaskFactory.fromData(0,
+                "string", "string", false);
     }
 
     public static String createEntityJSON() throws JsonProcessingException {
