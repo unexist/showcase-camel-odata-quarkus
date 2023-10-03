@@ -252,7 +252,6 @@ public class TodoResource {
         return builder.build();
     }
 
-
     @PUT
     @Path("{todoId}/task/{taskId}")
     @Consumes(MediaType.APPLICATION_JSON)
