@@ -24,8 +24,8 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 @QuarkusTest
-public class ODataServletTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ODataServletTest.class);
+public class ODataServletIntegrationTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ODataServletIntegrationTest.class);
 
     @Test
     public void shouldGetOverviewAsXML() {
