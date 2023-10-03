@@ -28,7 +28,7 @@ public class ODataServletIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ODataServletIntegrationTest.class);
 
     @Test
-    public void shouldGetOverviewAsXML() {
+    public void shouldGetServiceDocumentAsXML() {
         String xmlOut = given()
                 .when()
                     .accept(ContentType.XML)
@@ -46,7 +46,7 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    public void shouldGetOverviewAsJSON() {
+    public void shouldGetServiceDocumentAsJSON() {
         String jsonOut = given()
                 .when()
                   .accept(ContentType.JSON)
@@ -99,7 +99,7 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    public void shouldNotFindAnything() {
+    public void shouldNotFindEntity() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -114,6 +114,16 @@ public class ODataServletIntegrationTest {
                 .inPath("$.[\"error\"].message")
                     .isString()
                     .startsWith("Cannot find EntitySet");
+    }
+
+    @Test
+    public void shouldNotFindAnything() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(11)")
+                .then()
+                    .statusCode(404);
     }
 
     @Test
@@ -153,7 +163,6 @@ public class ODataServletIntegrationTest {
                 .inPath("$.[\"ID\"]")
                 .isEqualTo(1);
     }
-
 
     @Test
     public void shouldGetAttributeID() {

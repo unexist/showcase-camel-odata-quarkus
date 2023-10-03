@@ -12,6 +12,7 @@
 package dev.unexist.showcase.todo.application;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -20,10 +21,46 @@ import static io.restassured.RestAssured.given;
 public class TodoResourceIntegrationTest {
 
     @Test
-    public void shouldGetEmptyResult() {
+    public void shouldGetEmptyList() {
         given()
           .when().get("/todo")
           .then()
              .statusCode(204);
+    }
+
+    @Test
+    public void shouldCreateNewTodo() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createTodo())
+                    .post("/todo")
+                .then()
+                    .statusCode(201);
+    }
+
+    @Test
+    public void shouldNotFindAnything() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createTodo())
+                    .post("/todo/11")
+                .then()
+                    .statusCode(404);
+    }
+
+    @Test
+    public void shouldCreateNewTask() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TaskFixture.createTask())
+                    .post("/task")
+                .then()
+                    .statusCode(201);
     }
 }
