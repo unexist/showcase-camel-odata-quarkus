@@ -45,9 +45,7 @@ public class TodoResourceIntegrationTest {
         given()
                 .when()
                     .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(TodoFixture.createTodo())
-                    .post("/todo/11")
+                    .get("/todo/11")
                 .then()
                     .statusCode(404);
     }
