@@ -30,18 +30,11 @@ public class TodoResourceIntegrationTest {
 
     @Test
     public void shouldCreateNewTodo() {
-        given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(TodoFixture.createTodo())
-                    .post("/todo")
-                .then()
-                    .statusCode(201);
+        createTask();
     }
 
     @Test
-    public void shouldNotFindAnything() {
+    public void shouldNotFindAnyTodo() {
         given()
                 .when()
                     .accept(ContentType.JSON)
@@ -52,12 +45,46 @@ public class TodoResourceIntegrationTest {
 
     @Test
     public void shouldCreateNewTask() {
+        createTodo();
+        createTask();
+    }
+
+    @Test
+    public void shouldNotFindAnyTask() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/todo/11/task/1")
+                .then()
+                    .statusCode(404);
+    }
+
+    /**
+     * Create an entry via REST
+     **/
+
+    private static void createTodo() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createTodo())
+                    .post("/todo")
+                .then()
+                    .statusCode(201);
+    }
+
+    /**
+     * Create an entry via REST
+     **/
+
+    private static void createTask() {
         given()
                 .when()
                     .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
                     .body(TaskFixture.createTask())
-                    .post("/task")
+                    .post("/todo/1/task")
                 .then()
                     .statusCode(201);
     }
