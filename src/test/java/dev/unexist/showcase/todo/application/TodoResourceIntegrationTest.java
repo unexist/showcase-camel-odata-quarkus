@@ -21,7 +21,7 @@ import static io.restassured.RestAssured.given;
 public class TodoResourceIntegrationTest {
 
     @Test
-    public void shouldGetEmptyList() {
+    public void shouldGetEmptyTodoList() {
         given()
           .when().get("/todo")
           .then()
@@ -41,6 +41,14 @@ public class TodoResourceIntegrationTest {
                     .get("/todo/11")
                 .then()
                     .statusCode(404);
+    }
+
+    @Test
+    public void shouldGetEmptyTaskList() {
+        given()
+          .when().get("/todo/1/task")
+          .then()
+             .statusCode(204);
     }
 
     @Test
