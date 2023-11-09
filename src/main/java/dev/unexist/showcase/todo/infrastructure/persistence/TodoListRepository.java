@@ -24,8 +24,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 @ApplicationScoped
-public class ListTodoRepository implements CrudRepository<Todo> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ListTodoRepository.class);
+public class TodoListRepository implements CrudRepository<Todo> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TodoListRepository.class);
 
     private final List<Todo> list;
 
@@ -33,7 +33,7 @@ public class ListTodoRepository implements CrudRepository<Todo> {
      * Constructor
      **/
 
-    public ListTodoRepository() {
+    public TodoListRepository() {
         this.list = new ArrayList<>();
     }
 

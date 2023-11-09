@@ -24,8 +24,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 @ApplicationScoped
-public class ListTaskRepository implements CrudRepository<Task> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ListTaskRepository.class);
+public class TaskListRepository implements CrudRepository<Task> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskListRepository.class);
 
     private final List<Task> list;
 
@@ -33,7 +33,7 @@ public class ListTaskRepository implements CrudRepository<Task> {
      * Constructor
      **/
 
-    public ListTaskRepository() {
+    public TaskListRepository() {
         this.list = new ArrayList<>();
     }
 
