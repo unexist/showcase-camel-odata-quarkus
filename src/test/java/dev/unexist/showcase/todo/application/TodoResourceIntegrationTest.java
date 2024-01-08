@@ -35,12 +35,6 @@ public class TodoResourceIntegrationTest {
 
     @Test
     @Order(2)
-    public void shouldCreateNewTodo() {
-        createTodo();
-    }
-
-    @Test
-    @Order(3)
     public void shouldNotFindAnyTodo() {
         given()
                 .when()
@@ -48,6 +42,12 @@ public class TodoResourceIntegrationTest {
                     .get("/todo/11")
                 .then()
                     .statusCode(404);
+    }
+
+    @Test
+    @Order(3)
+    public void shouldCreateNewTodo() {
+        createTodo();
     }
 
     @Test
@@ -61,13 +61,6 @@ public class TodoResourceIntegrationTest {
 
     @Test
     @Order(5)
-    public void shouldCreateNewTask() {
-        createTodo();
-        createTask();
-    }
-
-    @Test
-    @Order(6)
     public void shouldNotFindAnyTask() {
         given()
                 .when()
@@ -75,6 +68,13 @@ public class TodoResourceIntegrationTest {
                     .get("/todo/11/task/1")
                 .then()
                     .statusCode(404);
+    }
+
+    @Test
+    @Order(6)
+    public void shouldCreateNewTask() {
+        createTodo();
+        createTask();
     }
 
     /**
