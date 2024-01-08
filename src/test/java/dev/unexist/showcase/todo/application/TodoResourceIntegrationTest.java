@@ -13,6 +13,7 @@ package dev.unexist.showcase.todo.application;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -21,6 +22,7 @@ import static io.restassured.RestAssured.given;
 public class TodoResourceIntegrationTest {
 
     @Test
+    @Order(1)
     public void shouldGetEmptyTodoList() {
         given()
           .when().get("/todo")
@@ -29,11 +31,13 @@ public class TodoResourceIntegrationTest {
     }
 
     @Test
+    @Order(2)
     public void shouldCreateNewTodo() {
-        createTask();
+        createTodo();
     }
 
     @Test
+    @Order(3)
     public void shouldNotFindAnyTodo() {
         given()
                 .when()
@@ -44,6 +48,7 @@ public class TodoResourceIntegrationTest {
     }
 
     @Test
+    @Order(4)
     public void shouldGetEmptyTaskList() {
         given()
           .when().get("/todo/1/task")
@@ -52,12 +57,14 @@ public class TodoResourceIntegrationTest {
     }
 
     @Test
+    @Order(5)
     public void shouldCreateNewTask() {
         createTodo();
         createTask();
     }
 
     @Test
+    @Order(6)
     public void shouldNotFindAnyTask() {
         given()
                 .when()
