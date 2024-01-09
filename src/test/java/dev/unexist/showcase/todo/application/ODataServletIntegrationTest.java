@@ -13,7 +13,10 @@ package dev.unexist.showcase.todo.application;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +27,12 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 @QuarkusTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ODataServletIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ODataServletIntegrationTest.class);
 
     @Test
+    @Order(1)
     public void shouldGetServiceDocumentAsXML() {
         String xmlOut = given()
                 .when()
@@ -46,6 +51,7 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
+    @Order(2)
     public void shouldGetServiceDocumentAsJSON() {
         String jsonOut = given()
                 .when()
@@ -81,6 +87,7 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
+    @Order(3)
     public void shouldGetEmptyList() {
         String jsonOut = given()
                 .when()
