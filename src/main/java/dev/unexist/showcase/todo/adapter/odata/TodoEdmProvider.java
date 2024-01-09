@@ -63,40 +63,10 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
         CsdlEntityType retVal = null;
 
         if (ET_TODO_FQN.equals(entityTypeName)) {
-            CsdlProperty id = new CsdlProperty()
-                    .setName("ID")
-                    .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-            CsdlProperty title = new CsdlProperty()
-                    .setName("Title")
-                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-            CsdlProperty  description = new CsdlProperty()
-                    .setName("Description")
-                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            retVal = createTodoEntity();
+        } else if (ET_TASK_FQN.equals(entityTypeName)) {
+            retVal = createTaskEntity();
 
-            /* Navigational */
-            CsdlNavigationProperty navProp = new CsdlNavigationProperty()
-                    .setName(ET_TASK_NAME)
-                    .setType(ET_TASK_FQN)
-                    .setNullable(false)
-                    .setPartner(ET_TODO_NAME);
-
-            List<CsdlNavigationProperty> navPropList = new ArrayList<>();
-
-            navPropList.add(navProp);
-
-            /* Create CsdlPropertyRef for Key element */
-            CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-            propertyRef.setName("ID");
-
-            /* Configure EntityType */
-            CsdlEntityType entityType = new CsdlEntityType();
-
-            entityType.setName(ET_TODO_NAME);
-            entityType.setProperties(Arrays.asList(id, title, description));
-            entityType.setKey(Collections.singletonList(propertyRef));
-            entityType.setNavigationProperties(navPropList);
-
-            retVal = entityType;
         }
 
         return retVal;
@@ -158,5 +128,78 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
         }
 
         return retVal;
+    }
+
+    private CsdlEntityType createTodoEntity() {
+        CsdlProperty id = new CsdlProperty()
+                .setName("ID")
+                .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
+        CsdlProperty title = new CsdlProperty()
+                .setName("Title")
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty  description = new CsdlProperty()
+                .setName("Description")
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+
+        /* Navigational */
+        CsdlNavigationProperty navProp = new CsdlNavigationProperty()
+                .setName(ET_TASK_NAME)
+                .setType(ET_TASK_FQN)
+                .setNullable(false)
+                .setPartner(ET_TODO_NAME);
+
+        List<CsdlNavigationProperty> navPropList = new ArrayList<>();
+
+        navPropList.add(navProp);
+
+        /* Create CsdlPropertyRef for Key element */
+        CsdlPropertyRef propertyRef = new CsdlPropertyRef();
+
+        propertyRef.setName("ID");
+
+        /* Configure EntityType */
+        CsdlEntityType entityType = new CsdlEntityType();
+
+        entityType.setName(ET_TODO_NAME);
+        entityType.setProperties(Arrays.asList(id, title, description));
+        entityType.setKey(Collections.singletonList(propertyRef));
+        entityType.setNavigationProperties(navPropList);
+
+        return entityType;
+    }
+
+    private CsdlEntityType createTaskEntity() {
+        CsdlProperty id = new CsdlProperty()
+                .setName("ID")
+                .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
+        CsdlProperty title = new CsdlProperty()
+                .setName("Title")
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+
+        /* Navigational */
+        CsdlNavigationProperty navProp = new CsdlNavigationProperty()
+                .setName(ET_TODO_NAME)
+                .setType(ET_TODO_FQN)
+                .setCollection(true)
+                .setPartner(ET_TASK_NAME);
+
+        List<CsdlNavigationProperty> navPropList = new ArrayList<>();
+
+        navPropList.add(navProp);
+
+        /* Create CsdlPropertyRef for Key element */
+        CsdlPropertyRef propertyRef = new CsdlPropertyRef();
+
+        propertyRef.setName("ID");
+
+        /* Configure EntityType */
+        CsdlEntityType entityType = new CsdlEntityType();
+
+        entityType.setName(ET_TASK_NAME);
+        entityType.setProperties(Arrays.asList(id, title));
+        entityType.setKey(Collections.singletonList(propertyRef));
+        entityType.setNavigationProperties(navPropList);
+
+        return entityType;
     }
 }
