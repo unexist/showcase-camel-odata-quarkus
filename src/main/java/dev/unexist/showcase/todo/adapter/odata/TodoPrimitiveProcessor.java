@@ -93,20 +93,21 @@ public class TodoPrimitiveProcessor implements PrimitiveProcessor {
         // 2. Retrieve data from backend
         /* 2.1. Retrieve the entity data, for which the property has to be read */
         Entity entity = storage.readEntityData(edmEntitySet, keyPredicates);
-        if (entity == null) { // Bad request
+        if (null == entity) { // Bad request
             throw new ODataApplicationException("Entity not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
         /* 2.2. retrieve the property data from the entity */
         Property property = entity.getProperty(edmPropertyName);
-        if (property == null) {
+        if (null == property) {
             throw new ODataApplicationException("Property not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
         /* 3. Serialize */
         Object value = property.getValue();
+
         if (null != value) {
             /* 3.1. Configure the serializer */
             ODataSerializer serializer = odata.createSerializer(contentType);
@@ -121,7 +122,7 @@ public class TodoPrimitiveProcessor implements PrimitiveProcessor {
             response.setContent(propertyStream);
             response.setStatusCode(HttpStatusCode.OK.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, contentType.toContentTypeString());
-        }else{
+        } else {
             response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
         }
     }
