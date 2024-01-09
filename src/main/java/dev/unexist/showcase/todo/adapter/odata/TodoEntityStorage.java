@@ -12,6 +12,7 @@
 package dev.unexist.showcase.todo.adapter.odata;
 
 import dev.unexist.showcase.todo.domain.CrudRepository;
+import dev.unexist.showcase.todo.domain.task.Task;
 import dev.unexist.showcase.todo.domain.todo.Todo;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
@@ -24,6 +25,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -45,6 +47,9 @@ public class TodoEntityStorage {
 
     @Inject
     CrudRepository<Todo> todoRepository;
+
+    @Inject
+    CrudRepository<Task> taskRepository;
 
     /**
      * Read data from an entity collection
@@ -157,10 +162,31 @@ public class TodoEntityStorage {
         EntityCollection entityCollection = new EntityCollection();
 
         for (Todo todo : this.todoRepository.getAll()) {
-            entityCollection.getEntities().add(createEntity(todo));
+            entityCollection.getEntities().add(createTodoEntity(todo));
         }
 
         return entityCollection;
+    }
+
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity, EdmEntityType targetEntityType) {
+        EntityCollection navigationTargetEntityCollection = new EntityCollection();
+
+        FullQualifiedName relatedEntityFqn = targetEntityType.getFullQualifiedName();
+        String sourceEntityFqn = sourceEntity.getType();
+
+        if (sourceEntityFqn.equals(TodoEdmProvider.ET_TODO_FQN.getFullQualifiedNameAsString())) {
+            int id = (Integer) sourceEntity.getProperty("ID").getValue();
+
+            for (Task task : this.taskRepository.findAllByPredicate(t -> t.getTodoId() == id)) {
+                navigationTargetEntityCollection.getEntities().add(createTaskEntity(task));
+            }
+        }
+
+        if (navigationTargetEntityCollection.getEntities().isEmpty()) {
+          return null;
+        }
+
+        return navigationTargetEntityCollection;
     }
 
     /**
@@ -288,7 +314,7 @@ public class TodoEntityStorage {
         Entity retVal = null;
 
         for (Todo todo : this.todoRepository.getAll()) {
-            Entity todoEntity = createEntity(todo);
+            Entity todoEntity = createTodoEntity(todo);
 
             if (entityMatchesAllKeys(edmEntityType, todoEntity, keyParams)) {
                 retVal = todoEntity;
@@ -335,13 +361,31 @@ public class TodoEntityStorage {
      * @return A newly created {@link Entity}
      **/
 
-    private Entity createEntity(Todo todo) {
+    private Entity createTodoEntity(Todo todo) {
         Entity entity = new Entity()
                 .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, todo.getId()))
                 .addProperty(new Property(null, "Title", ValueType.PRIMITIVE, todo.getTitle()))
                 .addProperty(new Property(null, "Description", ValueType.PRIMITIVE, todo.getDescription()));
 
         entity.setId(createId("Todos", todo.getId()));
+
+        return entity;
+    }
+
+    /**
+     * Create new entity from given {@link Task}
+     *
+     * @param  task  A {@link Task} to convert
+     *
+     * @return A newly created {@link Entity}
+     **/
+
+    private Entity createTaskEntity(Task task) {
+        Entity entity = new Entity()
+                .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, task.getId()))
+                .addProperty(new Property(null, "Title", ValueType.PRIMITIVE, task.getTitle()));
+
+        entity.setId(createId("Tasks", task.getId()));
 
         return entity;
     }
