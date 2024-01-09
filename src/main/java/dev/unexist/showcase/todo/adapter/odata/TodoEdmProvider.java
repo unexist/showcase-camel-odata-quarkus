@@ -18,6 +18,8 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
@@ -31,10 +33,13 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
     public static final String NAMESPACE = "OData.Todo";
     public static final String CONTAINER_NAME = "Container";
     public static final String ET_TODO_NAME = "Todo";
+    public static final String ET_TASK_NAME = "Task";
     public static final String ES_TODOS_NAME = "Todos";
+    public static final String ES_TASK_NAME = "Tasks";
 
     public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE, CONTAINER_NAME);
     public static final FullQualifiedName ET_TODO_FQN = new FullQualifiedName(NAMESPACE, ET_TODO_NAME);
+    public static final FullQualifiedName ET_TASK_FQN = new FullQualifiedName(NAMESPACE, ET_TASK_NAME);
 
     @Override
     public List<CsdlSchema> getSchemas() {
@@ -68,6 +73,17 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
                     .setName("Description")
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
+            /* Navigational */
+            CsdlNavigationProperty navProp = new CsdlNavigationProperty()
+                    .setName(ET_TASK_NAME)
+                    .setType(ET_TASK_FQN)
+                    .setNullable(false)
+                    .setPartner(ET_TODO_NAME);
+
+            List<CsdlNavigationProperty> navPropList = new ArrayList<>();
+
+            navPropList.add(navProp);
+
             /* Create CsdlPropertyRef for Key element */
             CsdlPropertyRef propertyRef = new CsdlPropertyRef();
             propertyRef.setName("ID");
@@ -78,6 +94,7 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
             entityType.setName(ET_TODO_NAME);
             entityType.setProperties(Arrays.asList(id, title, description));
             entityType.setKey(Collections.singletonList(propertyRef));
+            entityType.setNavigationProperties(navPropList);
 
             retVal = entityType;
         }
@@ -95,6 +112,18 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
 
                 entitySet.setName(ES_TODOS_NAME);
                 entitySet.setType(ET_TODO_FQN);
+
+                /* Navigational */
+                CsdlNavigationPropertyBinding navPropBinding = new CsdlNavigationPropertyBinding();
+
+                navPropBinding.setPath(ET_TASK_NAME);
+                navPropBinding.setTarget(ES_TODOS_NAME);
+
+                List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<>();
+
+                navPropBindingList.add(navPropBinding);
+
+                entitySet.setNavigationPropertyBindings(navPropBindingList);
 
                 retVal = entitySet;
             }
