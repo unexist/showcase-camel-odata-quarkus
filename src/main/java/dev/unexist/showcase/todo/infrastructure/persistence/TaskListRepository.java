@@ -22,11 +22,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class TaskListRepository implements CrudRepository<Task> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskListRepository.class);
-
     private final List<Task> list;
 
     /**
@@ -91,5 +91,12 @@ public class TaskListRepository implements CrudRepository<Task> {
         return this.list.stream()
                 .filter(filterBy)
                 .findFirst();
+    }
+
+    @Override
+    public List<Task> findAllByPredicate(Predicate<Task> filterBy) {
+        return this.list.stream()
+                .filter(filterBy)
+                .collect(Collectors.toUnmodifiableList());
     }
 }

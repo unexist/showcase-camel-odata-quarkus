@@ -73,5 +73,15 @@ public interface CrudRepository<K> {
      * @return A {@link Optional} with the result of the lookup
      **/
 
-    Optional<K> findByPredicate(Predicate<K> filterBy);
+   Optional<K> findByPredicate(Predicate<K> filterBy) ;
+
+    /**
+     * Find all {@link K} by given {@link Predicate}
+     *
+     * @param  filterBy  A {@link Predicate} to use
+     *
+     * @return A {@link List} with the result of the lookup
+     **/
+
+    List<K> findAllByPredicate(Predicate<K> filterBy);
 }

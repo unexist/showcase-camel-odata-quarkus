@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class TodoListRepository implements CrudRepository<Todo> {
@@ -91,5 +92,12 @@ public class TodoListRepository implements CrudRepository<Todo> {
         return this.list.stream()
                 .filter(filterBy)
                 .findFirst();
+    }
+
+    @Override
+    public List<Todo> findAllByPredicate(Predicate<Todo> filterBy) {
+        return this.list.stream()
+                .filter(filterBy)
+                .collect(Collectors.toUnmodifiableList());
     }
 }
