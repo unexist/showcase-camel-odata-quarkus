@@ -61,15 +61,18 @@ public class TodoEntityStorage {
      * @throws ODataApplicationException
      **/
 
-    public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet)
-            throws ODataApplicationException {
+    public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet) {
+        EntityCollection retVal = null;
+
         LOGGER.info(String.format("entity=%s", edmEntitySet.getName()));
 
         if (TodoEdmProvider.ES_TODOS_NAME.equals(edmEntitySet.getName())) {
-            return getTodos();
+            retVal = getTodos();
+        } else if (TodoEdmProvider.ES_TASK_NAME.equals(edmEntitySet.getName())) {
+            retVal = getTasks();
         }
 
-        return null;
+        return retVal;
     }
 
     /**
@@ -84,14 +87,18 @@ public class TodoEntityStorage {
      */
 
     public Entity readEntityData(EdmEntitySet edmEntitySet, List<UriParameter> keyParams)
-            throws ODataApplicationException {
+            throws ODataApplicationException
+    {
+        Entity retVal = null;
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
         if (TodoEdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            return getTodo(edmEntityType, keyParams);
+            retVal = getTodo(edmEntityType, keyParams);
+        } else if (TodoEdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
+            retVal = getTask(edmEntityType, keyParams);
         }
 
-        return null;
+        return retVal;
     }
 
     /**
@@ -104,13 +111,16 @@ public class TodoEntityStorage {
      */
 
     public Entity createEntityData(EdmEntitySet edmEntitySet, Entity requestEntity) {
+        Entity retVal = null;
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (edmEntityType.getName().equals(TodoEdmProvider.ET_TODO_NAME)) {
-            return createTodo(edmEntityType, requestEntity);
+        if (TodoEdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
+            retVal = createTodo(edmEntityType, requestEntity);
+        } else if (TodoEdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
+            retVal = getTask(edmEntityType, requestEntity);
         }
 
-        return null;
+        return retVal;
     }
 
     /**
@@ -126,11 +136,14 @@ public class TodoEntityStorage {
 
     public void updateEntityData(EdmEntitySet edmEntitySet, List<UriParameter> keyParams,
                                  Entity updateEntity, HttpMethod httpMethod)
-            throws ODataApplicationException {
+            throws ODataApplicationException
+    {
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (edmEntityType.getName().equals(TodoEdmProvider.ET_TODO_NAME)) {
+        if (TodoEdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
             updateTodo(edmEntityType, keyParams, updateEntity, httpMethod);
+        } else if (TodoEdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
+            updateTask(edmEntityType, keyParams, updateEntity, httpMethod);
         }
     }
 
@@ -147,9 +160,60 @@ public class TodoEntityStorage {
             throws ODataApplicationException {
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (edmEntityType.getName().equals(TodoEdmProvider.ET_TODO_NAME)) {
+        if (TodoEdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
             deleteTodo(edmEntityType, keyParams);
+        } else if (TodoEdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
+            deleteTask(edmEntityType, keyParams);
         }
+    }
+
+    public Entity getRelatedEntity(Entity entity, EdmEntityType relatedEntityType) {
+        EntityCollection collection = getRelatedEntityCollection(entity, relatedEntityType);
+
+        if (collection.getEntities().isEmpty()) {
+            return null;
+        }
+
+        return collection.getEntities().get(0);
+    }
+
+    public Entity getRelatedEntity(Entity entity, EdmEntityType relatedEntityType,
+                                   List<UriParameter> keyPredicates)
+            throws ODataApplicationException
+    {
+        EntityCollection relatedEntities = getRelatedEntityCollection(entity, relatedEntityType);
+
+        return findEntity(relatedEntityType, relatedEntities, keyPredicates);
+    }
+
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity, EdmEntityType targetEntityType) {
+        EntityCollection navigationTargetEntityCollection = new EntityCollection();
+        FullQualifiedName relatedEntityFqn = targetEntityType.getFullQualifiedName();
+        String sourceEntityFqn = sourceEntity.getType();
+
+        if (sourceEntityFqn.equals(TodoEdmProvider.ET_TODO_FQN.getFullQualifiedNameAsString())
+                && relatedEntityFqn.equals(TodoEdmProvider.ET_TASK_FQN))
+        {
+            int todoId = (Integer) sourceEntity.getProperty("ID").getValue();
+
+            for (Task task : this.taskRepository.findAllByPredicate(t -> t.getTodoId() == todoId)) {
+                navigationTargetEntityCollection.getEntities().add(createTaskEntity(task));
+            }
+        } else if (sourceEntityFqn.equals(TodoEdmProvider.ET_TASK_FQN.getFullQualifiedNameAsString())
+                && relatedEntityFqn.equals(TodoEdmProvider.ET_TODO_FQN))
+        {
+            int todoId = (Integer) sourceEntity.getProperty("TodoID").getValue();
+
+             for (Todo todo : this.todoRepository.findAllByPredicate(t -> t.getId() == todoId)) {
+                 navigationTargetEntityCollection.getEntities().add(createTodoEntity(todo));
+             }
+        }
+
+        if (navigationTargetEntityCollection.getEntities().isEmpty()) {
+          return null;
+        }
+
+        return navigationTargetEntityCollection;
     }
 
     /**
@@ -168,27 +232,6 @@ public class TodoEntityStorage {
         return entityCollection;
     }
 
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity, EdmEntityType targetEntityType) {
-        EntityCollection navigationTargetEntityCollection = new EntityCollection();
-
-        FullQualifiedName relatedEntityFqn = targetEntityType.getFullQualifiedName();
-        String sourceEntityFqn = sourceEntity.getType();
-
-        if (sourceEntityFqn.equals(TodoEdmProvider.ET_TODO_FQN.getFullQualifiedNameAsString())) {
-            int id = (Integer) sourceEntity.getProperty("ID").getValue();
-
-            for (Task task : this.taskRepository.findAllByPredicate(t -> t.getTodoId() == id)) {
-                navigationTargetEntityCollection.getEntities().add(createTaskEntity(task));
-            }
-        }
-
-        if (navigationTargetEntityCollection.getEntities().isEmpty()) {
-          return null;
-        }
-
-        return navigationTargetEntityCollection;
-    }
-
     /**
      * Get a single entity based on given data
      *
@@ -200,8 +243,10 @@ public class TodoEntityStorage {
      * @throws ODataApplicationException
      **/
 
-    private Entity getTodo(EdmEntityType edmEntityType, List<UriParameter> keyParams) throws ODataApplicationException {
-        Entity requestedEntity = findTodo(edmEntityType, keyParams);
+    private Entity getTodo(EdmEntityType edmEntityType, List<UriParameter> keyParams)
+            throws ODataApplicationException
+    {
+        Entity requestedEntity = findEntity(edmEntityType, keyParams);
 
         if (null == requestedEntity) {
             throw new ODataApplicationException("Entity for requested key doesn't exist",
@@ -225,7 +270,8 @@ public class TodoEntityStorage {
 
         this.todoRepository.add(todo);
 
-        entity.getProperties().add(new Property(null, "ID", ValueType.PRIMITIVE, todo.getId()));
+        entity.getProperties().add(
+                new Property(null, "ID", ValueType.PRIMITIVE, todo.getId()));
 
         return entity;
     }
@@ -242,8 +288,11 @@ public class TodoEntityStorage {
      **/
 
     private void updateTodo(EdmEntityType edmEntityType, List<UriParameter> keyParams,
-                            Entity entity, HttpMethod httpMethod) throws ODataApplicationException {
+                            Entity entity, HttpMethod httpMethod)
+            throws ODataApplicationException
+    {
         Entity productEntity = getTodo(edmEntityType, keyParams);
+
         if (null == productEntity) {
             throw new ODataApplicationException("Entity not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
@@ -251,6 +300,7 @@ public class TodoEntityStorage {
 
         /* Loop over all properties and replace the values with the values of the given payload */
         List<Property> existingProperties = productEntity.getProperties();
+
         for (Property existingProp : existingProperties) {
             String propName = existingProp.getName();
 
@@ -289,6 +339,7 @@ public class TodoEntityStorage {
             throws ODataApplicationException {
 
         Entity todoEntity = getTodo(edmEntityType, keyParams);
+
         if (null == todoEntity) {
             throw new ODataApplicationException("Entity not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
@@ -303,22 +354,25 @@ public class TodoEntityStorage {
      * Find entity based on given parameters
      *
      * @param  edmEntityType  A {@link EdmEntityType} to use
+     * @param  entitySet      A {@link EntityCollection} to use
      * @param  keyParams      A list of URI parameters
      *
      * @return Either found {@ink Entity}; otherwise {@code null}
      * @throws ODataApplicationException
      **/
 
-    public Entity findTodo(EdmEntityType edmEntityType, List<UriParameter> keyParams)
-            throws ODataApplicationException {
+    public Entity findEntity(EdmEntityType edmEntityType, EntityCollection entitySet,
+                             List<UriParameter> keyParams)
+            throws ODataApplicationException
+    {
         Entity retVal = null;
+        List<Entity> entityList = entitySet.getEntities();
 
-        for (Todo todo : this.todoRepository.getAll()) {
-            Entity todoEntity = createTodoEntity(todo);
+        for (Entity entity : entityList) {
+            boolean foundEntity = entityMatchesAllKeys(edmEntityType, entity, keyParams);
 
-            if (entityMatchesAllKeys(edmEntityType, todoEntity, keyParams)) {
-                retVal = todoEntity;
-
+            if (foundEntity) {
+                retVal = entity;
                 break;
             }
         }
@@ -383,6 +437,7 @@ public class TodoEntityStorage {
     private Entity createTaskEntity(Task task) {
         Entity entity = new Entity()
                 .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, task.getId()))
+                .addProperty(new Property(null, "TodoID", ValueType.PRIMITIVE, task.getTodoId()))
                 .addProperty(new Property(null, "Title", ValueType.PRIMITIVE, task.getTitle()));
 
         entity.setId(createId("Tasks", task.getId()));
