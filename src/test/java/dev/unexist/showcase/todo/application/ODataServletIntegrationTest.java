@@ -270,6 +270,7 @@ public class ODataServletIntegrationTest {
     @Test
     public void shouldGetNavigationEntities() {
         createTodo();
+        createTask();
 
         String jsonOut = given()
                 .when()
@@ -300,5 +301,20 @@ public class ODataServletIntegrationTest {
                     .post("/todo")
                 .then()
                     .statusCode(201);
+    }
+
+    /**
+     * Create an entry via REST
+     **/
+
+    private static void createTask() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .contentType(ContentType.JSON)
+                    .body(TaskFixture.createTask())
+                    .post("/todo/1/task")
+                .then()
+                    .statusCode(201);;
     }
 }
