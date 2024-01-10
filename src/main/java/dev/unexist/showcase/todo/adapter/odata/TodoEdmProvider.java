@@ -172,6 +172,9 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
         CsdlProperty id = new CsdlProperty()
                 .setName("ID")
                 .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
+        CsdlProperty todoId = new CsdlProperty()
+                .setName("TodoID")
+                .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
         CsdlProperty title = new CsdlProperty()
                 .setName("Title")
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
@@ -196,7 +199,7 @@ public class TodoEdmProvider extends CsdlAbstractEdmProvider {
         CsdlEntityType entityType = new CsdlEntityType();
 
         entityType.setName(ET_TASK_NAME);
-        entityType.setProperties(Arrays.asList(id, title));
+        entityType.setProperties(Arrays.asList(id, todoId, title));
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
 
