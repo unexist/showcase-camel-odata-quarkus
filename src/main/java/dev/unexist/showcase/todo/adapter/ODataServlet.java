@@ -11,11 +11,11 @@
 
 package dev.unexist.showcase.todo.adapter;
 
-import dev.unexist.showcase.todo.adapter.odata.TodoEdmProvider;
-import dev.unexist.showcase.todo.adapter.odata.TodoEntityCollectionProcessor;
-import dev.unexist.showcase.todo.adapter.odata.TodoEntityProcessor;
-import dev.unexist.showcase.todo.adapter.odata.TodoEntityStorage;
-import dev.unexist.showcase.todo.adapter.odata.TodoPrimitiveProcessor;
+import dev.unexist.showcase.todo.adapter.odata.EdmProvider;
+import dev.unexist.showcase.todo.adapter.odata.EntityCollectionProcessor;
+import dev.unexist.showcase.todo.adapter.odata.EntityProcessor;
+import dev.unexist.showcase.todo.adapter.odata.EntityStorage;
+import dev.unexist.showcase.todo.adapter.odata.PrimitiveProcessor;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -35,27 +35,27 @@ public class ODataServlet extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ODataServlet.class);
 
     @Inject
-    TodoEntityStorage storage;
+    EntityStorage storage;
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(true);
-        TodoEntityStorage storage = (TodoEntityStorage)session.getAttribute(TodoEntityStorage.class.getName());
+        EntityStorage storage = (EntityStorage)session.getAttribute(EntityStorage.class.getName());
 
         if (null == storage) {
             storage = this.storage;
 
-            session.setAttribute(TodoEntityStorage.class.getName(), storage);
+            session.setAttribute(EntityStorage.class.getName(), storage);
         }
 
         try {
             OData odata = OData.newInstance();
-            ServiceMetadata edm = odata.createServiceMetadata(new TodoEdmProvider(), new ArrayList<>());
+            ServiceMetadata edm = odata.createServiceMetadata(new EdmProvider(), new ArrayList<>());
             ODataHttpHandler handler = odata.createHandler(edm);
 
-            handler.register(new TodoEntityCollectionProcessor(storage));
-            handler.register(new TodoEntityProcessor(storage));
-            handler.register(new TodoPrimitiveProcessor(storage));
+            handler.register(new EntityCollectionProcessor(storage));
+            handler.register(new EntityProcessor(storage));
+            handler.register(new PrimitiveProcessor(storage));
 
             handler.process(request, response);
         } catch (RuntimeException e) {

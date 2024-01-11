@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class TodoEdmProvider extends CsdlAbstractEdmProvider {
+public class EdmProvider extends CsdlAbstractEdmProvider {
     public static final String NAMESPACE = "OData.Todo";
     public static final String CONTAINER_NAME = "Container";
     public static final String ET_TODO_NAME = "Todo";

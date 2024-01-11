@@ -23,7 +23,6 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
-import org.apache.olingo.server.api.processor.EntityCollectionProcessor;
 import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
@@ -37,16 +36,16 @@ import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import java.util.List;
 import java.util.Locale;
 
-public class TodoEntityCollectionProcessor extends TodoEntityProcessorBase
-        implements EntityCollectionProcessor
+public class EntityCollectionProcessor extends EntityProcessorBase
+        implements org.apache.olingo.server.api.processor.EntityCollectionProcessor
 {
     /**
      * Constructor
      *
-     * @param  storage  A {@link TodoEntityStorage} instance
+     * @param  storage  A {@link EntityStorage} instance
      **/
 
-    public TodoEntityCollectionProcessor(TodoEntityStorage storage) {
+    public EntityCollectionProcessor(EntityStorage storage) {
         this.storage = storage;
     }
 

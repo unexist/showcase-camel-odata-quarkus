@@ -11,9 +11,12 @@
 
 package dev.unexist.showcase.todo.adapter.odata;
 
-import dev.unexist.showcase.todo.domain.CrudRepository;
 import dev.unexist.showcase.todo.domain.task.Task;
+import dev.unexist.showcase.todo.domain.task.TaskBase;
+import dev.unexist.showcase.todo.domain.task.TaskService;
 import dev.unexist.showcase.todo.domain.todo.Todo;
+import dev.unexist.showcase.todo.domain.todo.TodoBase;
+import dev.unexist.showcase.todo.domain.todo.TodoService;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
@@ -40,16 +43,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @ApplicationScoped
-public class TodoEntityStorage {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TodoEntityStorage.class);
+public class EntityStorage {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EntityStorage.class);
 
     @Inject
-    CrudRepository<Todo> todoRepository;
+    TodoService todoService;
 
     @Inject
-    CrudRepository<Task> taskRepository;
+    TaskService taskService;
 
     /**
      * Read data from an entity collection
@@ -66,9 +70,9 @@ public class TodoEntityStorage {
 
         LOGGER.info(String.format("entity=%s", edmEntitySet.getName()));
 
-        if (TodoEdmProvider.ES_TODOS_NAME.equals(edmEntitySet.getName())) {
+        if (EdmProvider.ES_TODOS_NAME.equals(edmEntitySet.getName())) {
             retVal = getTodos();
-        } else if (TodoEdmProvider.ES_TASK_NAME.equals(edmEntitySet.getName())) {
+        } else if (EdmProvider.ES_TASK_NAME.equals(edmEntitySet.getName())) {
             retVal = getTasks();
         }
 
@@ -92,10 +96,10 @@ public class TodoEntityStorage {
         Entity retVal = null;
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (TodoEdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            retVal = getTodo(edmEntityType, keyParams);
-        } else if (TodoEdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
-            retVal = getTask(edmEntityType, keyParams);
+        if (EdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
+            retVal = getTodo(keyParams);
+        } else if (EdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
+            retVal = getTask(keyParams);
         }
 
         return retVal;
@@ -114,10 +118,10 @@ public class TodoEntityStorage {
         Entity retVal = null;
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (TodoEdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            retVal = createTodo(edmEntityType, requestEntity);
-        } else if (TodoEdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
-            retVal = getTask(edmEntityType, requestEntity);
+        if (EdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
+            retVal = createTodo(requestEntity);
+        } else if (EdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
+            retVal = getTask(requestEntity);
         }
 
         return retVal;
@@ -140,10 +144,10 @@ public class TodoEntityStorage {
     {
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (TodoEdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            updateTodo(edmEntityType, keyParams, updateEntity, httpMethod);
-        } else if (TodoEdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
-            updateTask(edmEntityType, keyParams, updateEntity, httpMethod);
+        if (EdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
+            updateTodo(keyParams, updateEntity, httpMethod);
+        } else if (EdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
+            updateTask(keyParams, updateEntity, httpMethod);
         }
     }
 
@@ -160,10 +164,10 @@ public class TodoEntityStorage {
             throws ODataApplicationException {
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (TodoEdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            deleteTodo(edmEntityType, keyParams);
-        } else if (TodoEdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
-            deleteTask(edmEntityType, keyParams);
+        if (EdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
+            deleteTodo(keyParams);
+        } else if (EdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
+            deleteTask(keyParams);
         }
     }
 
@@ -191,21 +195,23 @@ public class TodoEntityStorage {
         FullQualifiedName relatedEntityFqn = targetEntityType.getFullQualifiedName();
         String sourceEntityFqn = sourceEntity.getType();
 
-        if (sourceEntityFqn.equals(TodoEdmProvider.ET_TODO_FQN.getFullQualifiedNameAsString())
-                && relatedEntityFqn.equals(TodoEdmProvider.ET_TASK_FQN))
+        if (sourceEntityFqn.equals(EdmProvider.ET_TODO_FQN.getFullQualifiedNameAsString())
+                && relatedEntityFqn.equals(EdmProvider.ET_TASK_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("ID").getValue();
 
-            for (Task task : this.taskRepository.findAllByPredicate(t -> t.getTodoId() == todoId)) {
-                navigationTargetEntityCollection.getEntities().add(createTaskEntity(task));
+            for (Task task : this.taskService.getAllByTodoId(todoId)) {
+                navigationTargetEntityCollection.getEntities()
+                        .add(createTaskEntity(task));
             }
-        } else if (sourceEntityFqn.equals(TodoEdmProvider.ET_TASK_FQN.getFullQualifiedNameAsString())
-                && relatedEntityFqn.equals(TodoEdmProvider.ET_TODO_FQN))
+        } else if (sourceEntityFqn.equals(EdmProvider.ET_TASK_FQN.getFullQualifiedNameAsString())
+                && relatedEntityFqn.equals(EdmProvider.ET_TODO_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("TodoID").getValue();
 
-             for (Todo todo : this.todoRepository.findAllByPredicate(t -> t.getId() == todoId)) {
-                 navigationTargetEntityCollection.getEntities().add(createTodoEntity(todo));
+             for (Todo todo : this.todoService.getAllById(todoId)) {
+                 navigationTargetEntityCollection.getEntities()
+                         .add(createTodoEntity(todo));
              }
         }
 
@@ -225,8 +231,24 @@ public class TodoEntityStorage {
     private EntityCollection getTodos() {
         EntityCollection entityCollection = new EntityCollection();
 
-        for (Todo todo : this.todoRepository.getAll()) {
+        for (Todo todo : this.todoService.getAll()) {
             entityCollection.getEntities().add(createTodoEntity(todo));
+        }
+
+        return entityCollection;
+    }
+
+    /**
+     * Get all entities
+     *
+     * @return A {@link EntityCollection} with all entries
+     **/
+
+    private EntityCollection getTasks() {
+        EntityCollection entityCollection = new EntityCollection();
+
+        for (Task task : this.taskService.getAll()) {
+            entityCollection.getEntities().add(createTaskEntity(task));
         }
 
         return entityCollection;
@@ -259,19 +281,45 @@ public class TodoEntityStorage {
     /**
      * Create new entity
      *
-     * @param  edmEntityType  A {@link EdmEntityType} to use
-     * @param  entity         A {@link Entity} to apply properties to
+     * @param  entity  A {@link Entity} to apply properties to
      *
      * @return Updated {@link Entity}
      **/
 
-    private Entity createTodo(EdmEntityType edmEntityType, Entity entity) {
-        Todo todo = new Todo();
+    private Entity createTodo(Entity entity) {
+        TodoBase todoBase = new TodoBase();
 
-        this.todoRepository.add(todo);
+        Optional<Todo> todo = this.todoService.create(todoBase);
 
-        entity.getProperties().add(
-                new Property(null, "ID", ValueType.PRIMITIVE, todo.getId()));
+        if (todo.isPresent()) {
+            entity.getProperties().add(
+                new Property(null, "ID",
+                        ValueType.PRIMITIVE, todo.get().getId()));
+        }
+
+        return entity;
+    }
+
+    /**
+     * Create new entity
+     *
+     * @param  entity  A {@link Entity} to apply properties to
+     *
+     * @return Updated {@link Entity}
+     **/
+
+    private Entity createTask(Entity entity) {
+        TaskBase taskBase = new TaskBase();
+
+        Optional<Task> task = this.taskService.create(taskBase);
+
+        if (task.isPresent()) {
+            entity.getProperties().add(
+                new Property(null, "ID",
+                        ValueType.PRIMITIVE, task.get().getId()));
+            entity.getProperties().add(
+                    new Property(null, "TodoID", ValueType.PRIMITIVE, task.getId()));
+        }
 
         return entity;
     }

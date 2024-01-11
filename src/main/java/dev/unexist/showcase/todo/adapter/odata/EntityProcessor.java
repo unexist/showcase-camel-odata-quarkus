@@ -26,7 +26,6 @@ import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.deserializer.ODataDeserializer;
-import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.serializer.EntitySerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerResult;
@@ -41,16 +40,16 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
-public class TodoEntityProcessor extends TodoEntityProcessorBase
-        implements EntityProcessor
+public class EntityProcessor extends EntityProcessorBase
+        implements org.apache.olingo.server.api.processor.EntityProcessor
 {
     /**
      * Constructor
      *
-     * @param  storage  A {@link TodoEntityStorage} instance
+     * @param  storage  A {@link EntityStorage} instance
      **/
 
-    public TodoEntityProcessor(TodoEntityStorage storage) {
+    public EntityProcessor(EntityStorage storage) {
         this.storage = storage;
     }
 

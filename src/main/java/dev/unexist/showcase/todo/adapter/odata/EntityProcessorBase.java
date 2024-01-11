@@ -25,8 +25,8 @@ import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import java.util.List;
 import java.util.Locale;
 
-abstract public class TodoEntityProcessorBase {
-    protected TodoEntityStorage storage;
+abstract public class EntityProcessorBase {
+    protected EntityStorage storage;
     protected ServiceMetadata serviceMetadata;
     protected OData odata;
 

@@ -26,7 +26,6 @@ import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
-import org.apache.olingo.server.api.processor.PrimitiveProcessor;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerResult;
@@ -41,18 +40,18 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
-public class TodoPrimitiveProcessor implements PrimitiveProcessor {
+public class PrimitiveProcessor implements org.apache.olingo.server.api.processor.PrimitiveProcessor {
     private OData odata;
-    private TodoEntityStorage storage;
+    private EntityStorage storage;
     private ServiceMetadata serviceMetadata;
 
     /**
      * Constructor
      *
-     * @param  storage  A {@link TodoEntityStorage} instance
+     * @param  storage  A {@link EntityStorage} instance
      **/
 
-    public TodoPrimitiveProcessor(TodoEntityStorage storage) {
+    public PrimitiveProcessor(EntityStorage storage) {
         this.storage = storage;
     }
 
