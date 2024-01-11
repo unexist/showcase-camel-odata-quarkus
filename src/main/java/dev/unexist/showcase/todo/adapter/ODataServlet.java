@@ -11,11 +11,11 @@
 
 package dev.unexist.showcase.todo.adapter;
 
-import dev.unexist.showcase.todo.adapter.odata.EdmProvider;
-import dev.unexist.showcase.todo.adapter.odata.EntityCollectionProcessor;
-import dev.unexist.showcase.todo.adapter.odata.EntityProcessor;
-import dev.unexist.showcase.todo.adapter.odata.EntityStorage;
-import dev.unexist.showcase.todo.adapter.odata.PrimitiveProcessor;
+import dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider;
+import dev.unexist.showcase.todo.adapter.odata.processor.EntityCollectionProcessor;
+import dev.unexist.showcase.todo.adapter.odata.processor.EntityProcessor;
+import dev.unexist.showcase.todo.adapter.odata.processor.PrimitiveProcessor;
+import dev.unexist.showcase.todo.adapter.odata.storage.EntityStorage;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
