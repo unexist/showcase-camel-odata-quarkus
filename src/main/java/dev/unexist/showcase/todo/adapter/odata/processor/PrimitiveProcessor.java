@@ -9,8 +9,9 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo.adapter.odata;
+package dev.unexist.showcase.todo.adapter.odata.processor;
 
+import dev.unexist.showcase.todo.adapter.odata.storage.EntityStorage;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;

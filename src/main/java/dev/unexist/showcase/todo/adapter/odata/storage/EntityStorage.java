@@ -9,18 +9,15 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo.adapter.odata;
+package dev.unexist.showcase.todo.adapter.odata.storage;
 
+import dev.unexist.showcase.todo.adapter.odata.entity.TaskEntityFactory;
+import dev.unexist.showcase.todo.adapter.odata.entity.TodoEntityFactory;
 import dev.unexist.showcase.todo.domain.task.Task;
-import dev.unexist.showcase.todo.domain.task.TaskBase;
-import dev.unexist.showcase.todo.domain.task.TaskService;
 import dev.unexist.showcase.todo.domain.todo.Todo;
-import dev.unexist.showcase.todo.domain.todo.TodoBase;
-import dev.unexist.showcase.todo.domain.todo.TodoService;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
-import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
@@ -29,31 +26,24 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 @ApplicationScoped
 public class EntityStorage {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EntityStorage.class);
 
     @Inject
-    TodoService todoService;
+    TodoEntityFactory todoFactory;
 
     @Inject
-    TaskService taskService;
+    TaskEntityFactory taskFactory;
 
     /**
      * Read data from an entity collection
@@ -68,12 +58,10 @@ public class EntityStorage {
     public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet) {
         EntityCollection retVal = null;
 
-        LOGGER.info(String.format("entity=%s", edmEntitySet.getName()));
-
-        if (EdmProvider.ES_TODOS_NAME.equals(edmEntitySet.getName())) {
-            retVal = getTodos();
-        } else if (EdmProvider.ES_TASK_NAME.equals(edmEntitySet.getName())) {
-            retVal = getTasks();
+        if (TodoEntityFactory.ES_NAME.equals(edmEntitySet.getName())) {
+            retVal = this.todoFactory.getAll();
+        } else if (TaskEntityFactory.ES_NAME.equals(edmEntitySet.getName())) {
+            retVal = this.taskFactory.getAll();
         }
 
         return retVal;
@@ -96,10 +84,10 @@ public class EntityStorage {
         Entity retVal = null;
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (EdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            retVal = getTodo(keyParams);
-        } else if (EdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
-            retVal = getTask(keyParams);
+        if (TodoEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
+            retVal = this.todoFactory.findEntity(edmEntityType, keyParams);
+        } else if (TaskEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
+            retVal = this.taskFactory.findEntity(edmEntityType, keyParams);
         }
 
         return retVal;
@@ -118,10 +106,10 @@ public class EntityStorage {
         Entity retVal = null;
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (EdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            retVal = createTodo(requestEntity);
-        } else if (EdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
-            retVal = getTask(requestEntity);
+        if (TodoEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
+            retVal = this.todoFactory.createEntity(edmEntityType, requestEntity);
+        } else if (TaskEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
+            retVal = this.taskFactory.createEntity(edmEntityType, requestEntity);
         }
 
         return retVal;
@@ -142,13 +130,8 @@ public class EntityStorage {
                                  Entity updateEntity, HttpMethod httpMethod)
             throws ODataApplicationException
     {
-        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
+        updateEntity(edmEntitySet.getEntityType(), keyParams, updateEntity, httpMethod);
 
-        if (EdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            updateTodo(keyParams, updateEntity, httpMethod);
-        } else if (EdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
-            updateTask(keyParams, updateEntity, httpMethod);
-        }
     }
 
     /**
@@ -164,10 +147,10 @@ public class EntityStorage {
             throws ODataApplicationException {
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (EdmProvider.ET_TODO_NAME.equals(edmEntityType.getName())) {
-            deleteTodo(keyParams);
-        } else if (EdmProvider.ET_TASK_NAME.equals(edmEntityType.getName())) {
-            deleteTask(keyParams);
+        if (TodoEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
+            this.todoFactory.deleteEntity(edmEntityType, keyParams);
+        } else if (TaskEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
+            this.taskFactory.deleteEntity(edmEntityType, keyParams);
         }
     }
 
@@ -195,8 +178,8 @@ public class EntityStorage {
         FullQualifiedName relatedEntityFqn = targetEntityType.getFullQualifiedName();
         String sourceEntityFqn = sourceEntity.getType();
 
-        if (sourceEntityFqn.equals(EdmProvider.ET_TODO_FQN.getFullQualifiedNameAsString())
-                && relatedEntityFqn.equals(EdmProvider.ET_TASK_FQN))
+        if (sourceEntityFqn.equals(TodoEntityFactory.ET_FQN.getFullQualifiedNameAsString())
+                && relatedEntityFqn.equals(TaskEntityFactory.ET_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("ID").getValue();
 
@@ -204,8 +187,8 @@ public class EntityStorage {
                 navigationTargetEntityCollection.getEntities()
                         .add(createTaskEntity(task));
             }
-        } else if (sourceEntityFqn.equals(EdmProvider.ET_TASK_FQN.getFullQualifiedNameAsString())
-                && relatedEntityFqn.equals(EdmProvider.ET_TODO_FQN))
+        } else if (sourceEntityFqn.equals(TaskEntityFactory.ET_FQN.getFullQualifiedNameAsString())
+                && relatedEntityFqn.equals(TodoEntityFactory.ET_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("TodoID").getValue();
 
@@ -223,35 +206,62 @@ public class EntityStorage {
     }
 
     /**
-     * Get all entities
+     * Update entity based on given parameters
      *
-     * @return A {@link EntityCollection} with all entries
+     * @param  edmEntityType  A {@link EdmEntityType} to use
+     * @param  keyParams      A list of URI parameters
+     * @param  entity         A {@link Property} to update
+     * @param  httpMethod     {@link HttpMethod} used for the update call
+     *
+     * @throws ODataApplicationException
      **/
 
-    private EntityCollection getTodos() {
-        EntityCollection entityCollection = new EntityCollection();
+    private void updateEntity(EdmEntityType edmEntityType, List<UriParameter> keyParams,
+                              Entity entity, HttpMethod httpMethod)
+            throws ODataApplicationException
+    {
+        Entity foundEntity = getEntity(edmEntityType, keyParams);
 
-        for (Todo todo : this.todoService.getAll()) {
-            entityCollection.getEntities().add(createTodoEntity(todo));
+        if (null == foundEntity) {
+            throw new ODataApplicationException("Entity not found",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
-        return entityCollection;
-    }
+        /* Loop over all properties and replace the values with the values of the given payload */
+        List<Property> existingProperties = foundEntity.getProperties();
 
-    /**
-     * Get all entities
-     *
-     * @return A {@link EntityCollection} with all entries
-     **/
+        for (Property existingProp : existingProperties) {
+            String propName = existingProp.getName();
 
-    private EntityCollection getTasks() {
-        EntityCollection entityCollection = new EntityCollection();
+            /* Ignore the key properties, they aren't updateable */
+            if (isKey(edmEntityType, propName)) {
+                continue;
+            }
 
-        for (Task task : this.taskService.getAll()) {
-            entityCollection.getEntities().add(createTaskEntity(task));
+            Property updateProperty = entity.getProperty(propName);
+            if (null == updateProperty) {
+                /* If a property has NOT been added to the request payload depending on the
+                HttpMethod, our behavior is different */
+                if (httpMethod.equals(HttpMethod.PATCH)) {
+                    /* As of the OData spec, in case of PATCH, the existing property is not touched */
+                    continue;
+                } else if (httpMethod.equals(HttpMethod.PUT)) {
+                    existingProp.setValue(existingProp.getValueType(), null);
+
+                    continue;
+                }
+            }
+
+            existingProp.setValue(existingProp.getValueType(),
+                    updateProperty.getValue());
         }
 
-        return entityCollection;
+        /* Finally update entity */
+        if (TodoEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
+            this.taskFactory.updateEntity(edmEntityType, foundEntity);
+        } else if (TaskEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
+            this.taskFactory.updateEntity(edmEntityType, foundEntity);
+        }
     }
 
     /**
@@ -265,7 +275,7 @@ public class EntityStorage {
      * @throws ODataApplicationException
      **/
 
-    private Entity getTodo(EdmEntityType edmEntityType, List<UriParameter> keyParams)
+    private Entity getEntity(EdmEntityType edmEntityType, List<UriParameter> keyParams)
             throws ODataApplicationException
     {
         Entity requestedEntity = findEntity(edmEntityType, keyParams);
@@ -276,126 +286,6 @@ public class EntityStorage {
         }
 
         return requestedEntity;
-    }
-
-    /**
-     * Create new entity
-     *
-     * @param  entity  A {@link Entity} to apply properties to
-     *
-     * @return Updated {@link Entity}
-     **/
-
-    private Entity createTodo(Entity entity) {
-        TodoBase todoBase = new TodoBase();
-
-        Optional<Todo> todo = this.todoService.create(todoBase);
-
-        if (todo.isPresent()) {
-            entity.getProperties().add(
-                new Property(null, "ID",
-                        ValueType.PRIMITIVE, todo.get().getId()));
-        }
-
-        return entity;
-    }
-
-    /**
-     * Create new entity
-     *
-     * @param  entity  A {@link Entity} to apply properties to
-     *
-     * @return Updated {@link Entity}
-     **/
-
-    private Entity createTask(Entity entity) {
-        TaskBase taskBase = new TaskBase();
-
-        Optional<Task> task = this.taskService.create(taskBase);
-
-        if (task.isPresent()) {
-            entity.getProperties().add(
-                new Property(null, "ID",
-                        ValueType.PRIMITIVE, task.get().getId()));
-            entity.getProperties().add(
-                    new Property(null, "TodoID", ValueType.PRIMITIVE, task.getId()));
-        }
-
-        return entity;
-    }
-
-    /**
-     * Update entity based on given parameters
-     *
-     * @param  edmEntityType  A {@link EdmEntityType} to use
-     * @param  keyParams      A list of URI parameters
-     * @param  entity         A {@link Property} to update
-     * @param  httpMethod     {@link HttpMethod} used for the update call
-     *
-     * @throws ODataApplicationException
-     **/
-
-    private void updateTodo(EdmEntityType edmEntityType, List<UriParameter> keyParams,
-                            Entity entity, HttpMethod httpMethod)
-            throws ODataApplicationException
-    {
-        Entity productEntity = getTodo(edmEntityType, keyParams);
-
-        if (null == productEntity) {
-            throw new ODataApplicationException("Entity not found",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
-        }
-
-        /* Loop over all properties and replace the values with the values of the given payload */
-        List<Property> existingProperties = productEntity.getProperties();
-
-        for (Property existingProp : existingProperties) {
-            String propName = existingProp.getName();
-
-            /* Ignore the key properties, they aren't updateable */
-            if (isKey(edmEntityType, propName)) {
-                continue;
-            }
-
-            Property updateProperty = entity.getProperty(propName);
-            if (null == updateProperty) {
-                /* If a property has NOT been added to the request payload depending on the HttpMethod, our behavior is different */
-                if (httpMethod.equals(HttpMethod.PATCH)) {
-                    /* As of the OData spec, in case of PATCH, the existing property is not touched */
-                    continue;
-                } else if (httpMethod.equals(HttpMethod.PUT)) {
-                    existingProp.setValue(existingProp.getValueType(), null);
-
-                    continue;
-                }
-            }
-
-            existingProp.setValue(existingProp.getValueType(), updateProperty.getValue());
-        }
-    }
-
-    /**
-     * Delete entity based on given parameters
-     *
-     * @param  edmEntityType  A {@link EdmEntityType} to use
-     * @param  keyParams      A list of URI parameters
-     *
-     * @throws ODataApplicationException
-     **/
-
-    private void deleteTodo(EdmEntityType edmEntityType, List<UriParameter> keyParams)
-            throws ODataApplicationException {
-
-        Entity todoEntity = getTodo(edmEntityType, keyParams);
-
-        if (null == todoEntity) {
-            throw new ODataApplicationException("Entity not found",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
-        }
-
-        Integer existingID = (Integer)todoEntity.getProperty("ID").getValue();
-
-        this.todoRepository.deleteById(existingID);
     }
 
     /**
@@ -456,61 +346,6 @@ public class EntityStorage {
     }
 
     /**
-     * Create new entity from given {@link Todo}
-     *
-     * @param  todo  A {@link Todo} to convert
-     *
-     * @return A newly created {@link Entity}
-     **/
-
-    private Entity createTodoEntity(Todo todo) {
-        Entity entity = new Entity()
-                .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, todo.getId()))
-                .addProperty(new Property(null, "Title", ValueType.PRIMITIVE, todo.getTitle()))
-                .addProperty(new Property(null, "Description", ValueType.PRIMITIVE, todo.getDescription()));
-
-        entity.setId(createId("Todos", todo.getId()));
-
-        return entity;
-    }
-
-    /**
-     * Create new entity from given {@link Task}
-     *
-     * @param  task  A {@link Task} to convert
-     *
-     * @return A newly created {@link Entity}
-     **/
-
-    private Entity createTaskEntity(Task task) {
-        Entity entity = new Entity()
-                .addProperty(new Property(null, "ID", ValueType.PRIMITIVE, task.getId()))
-                .addProperty(new Property(null, "TodoID", ValueType.PRIMITIVE, task.getTodoId()))
-                .addProperty(new Property(null, "Title", ValueType.PRIMITIVE, task.getTitle()));
-
-        entity.setId(createId("Tasks", task.getId()));
-
-        return entity;
-    }
-
-    /**
-     * Create an ID from given values
-     *
-     * @param  entitySetName   Name for the entity set part in the ID
-     * @param  id              ID part of the created URI
-     *
-     * @return A newly created {@link URI}
-     **/
-
-    private URI createId(String entitySetName, Object id) {
-        try {
-            return new URI(String.format("%s(%s)", entitySetName, id));
-        } catch (URISyntaxException e) {
-            throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
-        }
-    }
-
-    /**
      * Match all given keys
      *
      * @param  edmEntityType  A {@link EdmEntityType} to use
@@ -522,7 +357,8 @@ public class EntityStorage {
      **/
 
     public boolean entityMatchesAllKeys(EdmEntityType edmEntityType, Entity rt_entity, List<UriParameter> keyParams)
-            throws ODataApplicationException {
+            throws ODataApplicationException
+    {
         for (final UriParameter key : keyParams) {
             String keyName = key.getName();
             String keyText = key.getText();
