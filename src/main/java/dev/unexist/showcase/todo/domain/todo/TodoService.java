@@ -85,6 +85,18 @@ public class TodoService {
     }
 
     /**
+     * Get all {@link Todo} entries by todo id
+     *
+     * @param  todoId  Id to find
+     *
+     * @return List of all {@link Todo}; might be empty
+     **/
+
+    public List<Todo> getAllById(int todoId) {
+        return this.todoRepository.findAllByPredicate(t -> t.getId() == todoId);
+    }
+
+    /**
      * Find {@link Todo} by given id
      *
      * @param  id  Id to look for

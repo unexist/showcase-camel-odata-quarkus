@@ -85,6 +85,18 @@ public class TaskService {
     }
 
     /**
+     * Get all {@link Task} entries by todo id
+     *
+     * @param  todoId  Id to find
+     *
+     * @return List of all {@link Task}; might be empty
+     **/
+
+    public List<Task> getAllByTodoId(int todoId) {
+        return this.taskRepository.findAllByPredicate(t -> t.getTodoId() == todoId);
+    }
+
+    /**
      * Find {@link Task} by given id
      *
      * @param  id  Id to look for
