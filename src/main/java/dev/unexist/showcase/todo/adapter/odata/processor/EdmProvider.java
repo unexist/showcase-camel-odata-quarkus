@@ -37,6 +37,7 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
         schema.setNamespace(NAMESPACE);
 
         List<CsdlEntityType> entityTypes = new ArrayList<>();
+
         entityTypes.add(TodoEntityService.createEntityType());
         entityTypes.add(TaskEntityService.createEntityType());
 

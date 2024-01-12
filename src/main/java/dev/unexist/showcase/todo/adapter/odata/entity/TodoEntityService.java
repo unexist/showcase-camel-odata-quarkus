@@ -64,7 +64,7 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
                 .setName(TaskEntityService.ET_NAME)
                 .setType(TaskEntityService.ET_FQN)
                 .setNullable(false)
-                .setPartner(ET_NAME);
+                .setPartner(ES_NAME);
 
         List<CsdlNavigationProperty> navPropList = new ArrayList<>();
 
