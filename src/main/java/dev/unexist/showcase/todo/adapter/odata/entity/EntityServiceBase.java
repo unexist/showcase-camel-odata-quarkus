@@ -18,7 +18,7 @@ import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-abstract class EntityFactoryBase<T> {
+abstract class EntityServiceBase<T> {
     public static CsdlEntityType createEntityType() {
         throw new ODataRuntimeException("Unable to create entity type");
     }

@@ -37,7 +37,7 @@ import java.util.Optional;
 import static dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider.NAMESPACE;
 
 @ApplicationScoped
-public class TaskEntityFactory extends EntityFactoryBase<Task> {
+public class TaskEntityService extends EntityServiceBase<Task> {
     public static final String ET_NAME = "Task";
     public static final String ES_NAME = "Tasks";
 
@@ -62,7 +62,7 @@ public class TaskEntityFactory extends EntityFactoryBase<Task> {
                 .setName(ET_NAME)
                 .setType(ET_FQN)
                 .setCollection(true)
-                .setPartner(TodoEntityFactory.ET_NAME);
+                .setPartner(TodoEntityService.ET_NAME);
 
         List<CsdlNavigationProperty> navPropList = new ArrayList<>();
 

@@ -11,8 +11,8 @@
 
 package dev.unexist.showcase.todo.adapter.odata.processor;
 
-import dev.unexist.showcase.todo.adapter.odata.entity.TaskEntityFactory;
-import dev.unexist.showcase.todo.adapter.odata.entity.TodoEntityFactory;
+import dev.unexist.showcase.todo.adapter.odata.entity.TaskEntityService;
+import dev.unexist.showcase.todo.adapter.odata.entity.TodoEntityService;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
@@ -37,8 +37,8 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
         schema.setNamespace(NAMESPACE);
 
         List<CsdlEntityType> entityTypes = new ArrayList<>();
-        entityTypes.add(TodoEntityFactory.createEntityType());
-        entityTypes.add(TaskEntityFactory.createEntityType());
+        entityTypes.add(TodoEntityService.createEntityType());
+        entityTypes.add(TaskEntityService.createEntityType());
 
         schema.setEntityTypes(entityTypes);
         schema.setEntityContainer(getEntityContainer());
@@ -53,10 +53,10 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
     public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) {
         CsdlEntityType retVal = null;
 
-        if (TodoEntityFactory.ET_FQN.equals(entityTypeName)) {
-            retVal = TodoEntityFactory.createEntityType();
-        } else if (TaskEntityFactory.ET_FQN.equals(entityTypeName)) {
-            retVal = TaskEntityFactory.createEntityType();
+        if (TodoEntityService.ET_FQN.equals(entityTypeName)) {
+            retVal = TodoEntityService.createEntityType();
+        } else if (TaskEntityService.ET_FQN.equals(entityTypeName)) {
+            retVal = TaskEntityService.createEntityType();
         }
 
         return retVal;
@@ -67,17 +67,17 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
         CsdlEntitySet retVal = null;
 
         if (CONTAINER.equals(entityContainer)) {
-            if (TodoEntityFactory.ES_NAME.equals(entitySetName)) {
+            if (TodoEntityService.ES_NAME.equals(entitySetName)) {
                 CsdlEntitySet entitySet = new CsdlEntitySet();
 
-                entitySet.setName(TodoEntityFactory.ES_NAME);
-                entitySet.setType(TodoEntityFactory.ET_FQN);
+                entitySet.setName(TodoEntityService.ES_NAME);
+                entitySet.setType(TodoEntityService.ET_FQN);
 
                 /* Navigational */
                 CsdlNavigationPropertyBinding navPropBinding = new CsdlNavigationPropertyBinding();
 
-                navPropBinding.setPath(TaskEntityFactory.ET_NAME);
-                navPropBinding.setTarget(TaskEntityFactory.ES_NAME);
+                navPropBinding.setPath(TaskEntityService.ET_NAME);
+                navPropBinding.setTarget(TaskEntityService.ES_NAME);
 
                 List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<>();
 
@@ -95,7 +95,7 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
     @Override
     public CsdlEntityContainer getEntityContainer() {
         List<CsdlEntitySet> entitySets = new ArrayList<>();
-        entitySets.add(getEntitySet(CONTAINER, TodoEntityFactory.ES_NAME));
+        entitySets.add(getEntitySet(CONTAINER, TodoEntityService.ES_NAME));
 
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();
 
@@ -109,7 +109,7 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
     public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) {
         CsdlEntityContainerInfo retVal = null;
 
-        // This method is invoked when displaying the service document */
+        /* This method is invoked when displaying the service document */
         if (null == entityContainerName || CONTAINER.equals(entityContainerName)) {
             CsdlEntityContainerInfo entityContainerInfo = new CsdlEntityContainerInfo();
             entityContainerInfo.setContainerName(CONTAINER);
