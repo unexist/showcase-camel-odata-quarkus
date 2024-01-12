@@ -11,10 +11,8 @@
 
 package dev.unexist.showcase.todo.adapter.odata.storage;
 
-import dev.unexist.showcase.todo.adapter.odata.entity.TaskEntityFactory;
-import dev.unexist.showcase.todo.adapter.odata.entity.TodoEntityFactory;
-import dev.unexist.showcase.todo.domain.task.Task;
-import dev.unexist.showcase.todo.domain.todo.Todo;
+import dev.unexist.showcase.todo.adapter.odata.entity.TaskEntityService;
+import dev.unexist.showcase.todo.adapter.odata.entity.TodoEntityService;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
@@ -40,10 +38,10 @@ import java.util.Locale;
 public class EntityStorage {
 
     @Inject
-    TodoEntityFactory todoFactory;
+    TodoEntityService todoEntityService;
 
     @Inject
-    TaskEntityFactory taskFactory;
+    TaskEntityService taskEntityService;
 
     /**
      * Read data from an entity collection
@@ -51,17 +49,37 @@ public class EntityStorage {
      * @param  edmEntitySet  A {@link EdmEntitySet} to use
      *
      * @return Either found {@link EntityCollection} on success; otherwise {@code null}
-     *
-     * @throws ODataApplicationException
      **/
 
     public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet) {
         EntityCollection retVal = null;
 
-        if (TodoEntityFactory.ES_NAME.equals(edmEntitySet.getName())) {
-            retVal = this.todoFactory.getAll();
-        } else if (TaskEntityFactory.ES_NAME.equals(edmEntitySet.getName())) {
-            retVal = this.taskFactory.getAll();
+        if (TodoEntityService.ES_NAME.equals(edmEntitySet.getName())) {
+            retVal = this.todoEntityService.getAll();
+        } else if (TaskEntityService.ES_NAME.equals(edmEntitySet.getName())) {
+            retVal = this.taskEntityService.getAll();
+        }
+
+        return retVal;
+    }
+
+    /**
+     * Create new entity from request entity
+     *
+     * @param  edmEntitySet   A {@link EdmEntitySet} to use
+     * @param  requestEntity  A {@link Entity} to update
+     *
+     * @return Either updated {@link Entity} on success; otherwise {@code null}
+     */
+
+    public Entity createEntityData(EdmEntitySet edmEntitySet, Entity requestEntity) {
+        Entity retVal = null;
+        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
+
+        if (TodoEntityService.ET_NAME.equals(edmEntityType.getName())) {
+            retVal = this.todoEntityService.createEntity(requestEntity);
+        } else if (TaskEntityService.ET_NAME.equals(edmEntityType.getName())) {
+            retVal = this.taskEntityService.createEntity(requestEntity);
         }
 
         return retVal;
@@ -84,32 +102,12 @@ public class EntityStorage {
         Entity retVal = null;
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (TodoEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
-            retVal = this.todoFactory.findEntity(edmEntityType, keyParams);
-        } else if (TaskEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
-            retVal = this.taskFactory.findEntity(edmEntityType, keyParams);
-        }
+        /* Try to find entity */
+        Entity foundEntity = getEntity(edmEntityType, keyParams);
 
-        return retVal;
-    }
-
-    /**
-     * Create new entity from request entity
-     *
-     * @param  edmEntitySet   A {@link EdmEntitySet} to use
-     * @param  requestEntity  A {@link Entity} to update
-     *
-     * @return Either updated {@link Entity} on success; otherwise {@code null}
-     */
-
-    public Entity createEntityData(EdmEntitySet edmEntitySet, Entity requestEntity) {
-        Entity retVal = null;
-        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
-
-        if (TodoEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
-            retVal = this.todoFactory.createEntity(edmEntityType, requestEntity);
-        } else if (TaskEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
-            retVal = this.taskFactory.createEntity(edmEntityType, requestEntity);
+        if (null == foundEntity) {
+            throw new ODataApplicationException("Entity not found",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
         return retVal;
@@ -130,8 +128,51 @@ public class EntityStorage {
                                  Entity updateEntity, HttpMethod httpMethod)
             throws ODataApplicationException
     {
-        updateEntity(edmEntitySet.getEntityType(), keyParams, updateEntity, httpMethod);
+        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
+        /* Try to find entity */
+        Entity foundEntity = getEntity(edmEntityType, keyParams);
+
+        if (null == foundEntity) {
+            throw new ODataApplicationException("Entity not found",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
+        }
+
+        /* Loop over all properties and replace the values with the values of the given payload */
+        List<Property> existingProperties = foundEntity.getProperties();
+
+        for (Property existingProp : existingProperties) {
+            String propName = existingProp.getName();
+
+            /* Ignore the key properties, they aren't updateable */
+            if (isKey(edmEntityType, propName)) {
+                continue;
+            }
+
+            Property updateProperty = foundEntity.getProperty(propName);
+            if (null == updateProperty) {
+                /* If a property has NOT been added to the request payload depending on the
+                HttpMethod, our behavior is different */
+                if (httpMethod.equals(HttpMethod.PATCH)) {
+                    /* As of the OData spec, in case of PATCH, the existing property is not touched */
+                    continue;
+                } else if (httpMethod.equals(HttpMethod.PUT)) {
+                    existingProp.setValue(existingProp.getValueType(), null);
+
+                    continue;
+                }
+            }
+
+            existingProp.setValue(existingProp.getValueType(),
+                    updateProperty.getValue());
+        }
+
+        /* Finally update entity */
+        if (TodoEntityService.ET_NAME.equals(edmEntityType.getName())) {
+            this.taskEntityService.updateEntity(foundEntity);
+        } else if (TaskEntityService.ET_NAME.equals(edmEntityType.getName())) {
+            this.taskEntityService.updateEntity(foundEntity);
+        }
     }
 
     /**
@@ -144,13 +185,17 @@ public class EntityStorage {
      **/
 
     public void deleteEntityData(EdmEntitySet edmEntitySet, List<UriParameter> keyParams)
-            throws ODataApplicationException {
+            throws ODataApplicationException
+    {
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
-        if (TodoEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
-            this.todoFactory.deleteEntity(edmEntityType, keyParams);
-        } else if (TaskEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
-            this.taskFactory.deleteEntity(edmEntityType, keyParams);
+        /* Try to find entity */
+        Entity foundEntity = getEntity(edmEntityType, keyParams);
+
+        if (TodoEntityService.ET_NAME.equals(edmEntityType.getName())) {
+            this.todoEntityService.deleteEntity(foundEntity);
+        } else if (TaskEntityService.ET_NAME.equals(edmEntityType.getName())) {
+            this.taskEntityService.deleteEntity(foundEntity);
         }
     }
 
@@ -178,24 +223,22 @@ public class EntityStorage {
         FullQualifiedName relatedEntityFqn = targetEntityType.getFullQualifiedName();
         String sourceEntityFqn = sourceEntity.getType();
 
-        if (sourceEntityFqn.equals(TodoEntityFactory.ET_FQN.getFullQualifiedNameAsString())
-                && relatedEntityFqn.equals(TaskEntityFactory.ET_FQN))
+        if (sourceEntityFqn.equals(TodoEntityService.ET_FQN.getFullQualifiedNameAsString())
+                && relatedEntityFqn.equals(TaskEntityService.ET_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("ID").getValue();
 
-            for (Task task : this.taskService.getAllByTodoId(todoId)) {
-                navigationTargetEntityCollection.getEntities()
-                        .add(createTaskEntity(task));
-            }
-        } else if (sourceEntityFqn.equals(TaskEntityFactory.ET_FQN.getFullQualifiedNameAsString())
-                && relatedEntityFqn.equals(TodoEntityFactory.ET_FQN))
+            navigationTargetEntityCollection.getEntities().addAll(
+                    this.taskEntityService.getAllByPredicate(t -> t.getTodoId() == todoId)
+                            .getEntities());
+        } else if (sourceEntityFqn.equals(TaskEntityService.ET_FQN.getFullQualifiedNameAsString())
+                && relatedEntityFqn.equals(TodoEntityService.ET_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("TodoID").getValue();
 
-             for (Todo todo : this.todoService.getAllById(todoId)) {
-                 navigationTargetEntityCollection.getEntities()
-                         .add(createTodoEntity(todo));
-             }
+            navigationTargetEntityCollection.getEntities().addAll(
+                    this.todoEntityService.getAllByPredicate(t -> t.getId() == todoId)
+                            .getEntities());
         }
 
         if (navigationTargetEntityCollection.getEntities().isEmpty()) {
@@ -203,65 +246,6 @@ public class EntityStorage {
         }
 
         return navigationTargetEntityCollection;
-    }
-
-    /**
-     * Update entity based on given parameters
-     *
-     * @param  edmEntityType  A {@link EdmEntityType} to use
-     * @param  keyParams      A list of URI parameters
-     * @param  entity         A {@link Property} to update
-     * @param  httpMethod     {@link HttpMethod} used for the update call
-     *
-     * @throws ODataApplicationException
-     **/
-
-    private void updateEntity(EdmEntityType edmEntityType, List<UriParameter> keyParams,
-                              Entity entity, HttpMethod httpMethod)
-            throws ODataApplicationException
-    {
-        Entity foundEntity = getEntity(edmEntityType, keyParams);
-
-        if (null == foundEntity) {
-            throw new ODataApplicationException("Entity not found",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
-        }
-
-        /* Loop over all properties and replace the values with the values of the given payload */
-        List<Property> existingProperties = foundEntity.getProperties();
-
-        for (Property existingProp : existingProperties) {
-            String propName = existingProp.getName();
-
-            /* Ignore the key properties, they aren't updateable */
-            if (isKey(edmEntityType, propName)) {
-                continue;
-            }
-
-            Property updateProperty = entity.getProperty(propName);
-            if (null == updateProperty) {
-                /* If a property has NOT been added to the request payload depending on the
-                HttpMethod, our behavior is different */
-                if (httpMethod.equals(HttpMethod.PATCH)) {
-                    /* As of the OData spec, in case of PATCH, the existing property is not touched */
-                    continue;
-                } else if (httpMethod.equals(HttpMethod.PUT)) {
-                    existingProp.setValue(existingProp.getValueType(), null);
-
-                    continue;
-                }
-            }
-
-            existingProp.setValue(existingProp.getValueType(),
-                    updateProperty.getValue());
-        }
-
-        /* Finally update entity */
-        if (TodoEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
-            this.taskFactory.updateEntity(edmEntityType, foundEntity);
-        } else if (TaskEntityFactory.ET_NAME.equals(edmEntityType.getName())) {
-            this.taskFactory.updateEntity(edmEntityType, foundEntity);
-        }
     }
 
     /**
@@ -278,14 +262,21 @@ public class EntityStorage {
     private Entity getEntity(EdmEntityType edmEntityType, List<UriParameter> keyParams)
             throws ODataApplicationException
     {
-        Entity requestedEntity = findEntity(edmEntityType, keyParams);
+        /* Try to find entity */
+        Entity foundEntity = null;
 
-        if (null == requestedEntity) {
+        if (TodoEntityService.ET_NAME.equals(edmEntityType.getName())) {
+            foundEntity = findEntity(edmEntityType, this.todoEntityService.getAll(), keyParams);
+        } else if (TaskEntityService.ET_NAME.equals(edmEntityType.getName())) {
+            foundEntity = findEntity(edmEntityType, this.taskEntityService.getAll(), keyParams);
+        }
+
+        if (null == foundEntity) {
             throw new ODataApplicationException("Entity for requested key doesn't exist",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
-        return requestedEntity;
+        return foundEntity;
     }
 
     /**
@@ -299,7 +290,7 @@ public class EntityStorage {
      * @throws ODataApplicationException
      **/
 
-    public Entity findEntity(EdmEntityType edmEntityType, EntityCollection entitySet,
+    private Entity findEntity(EdmEntityType edmEntityType, EntityCollection entitySet,
                              List<UriParameter> keyParams)
             throws ODataApplicationException
     {
@@ -380,17 +371,16 @@ public class EntityStorage {
             Object valueObject = rt_entity.getProperty(keyName).getValue(); // null-check is done in FWK
 
             /* Now need to compare the valueObject with the keyText String */
-            String valueAsString = null;
             try {
-                valueAsString = edmPrimitiveType.valueToString(valueObject, isNullable, maxLength,
+                String valueAsString = edmPrimitiveType.valueToString(valueObject, isNullable, maxLength,
                         precision, scale, isUnicode);
+
+                if (valueAsString == null || !valueAsString.equals(keyText)) {
+                    return false;
+                }
             } catch (EdmPrimitiveTypeException e) {
                 throw new ODataApplicationException("Failed to retrieve String value",
                         HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), Locale.ENGLISH, e);
-            }
-
-            if (valueAsString == null || !valueAsString.equals(keyText)) {
-                return false;
             }
         }
 
