@@ -18,16 +18,12 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriParameter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -35,13 +31,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import static dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider.NAMESPACE;
 
 @ApplicationScoped
-public class TaskEntityFactory implements EntityFactoryBase<Task> {
+public class TaskEntityFactory extends EntityFactoryBase<Task> {
     public static final String ET_NAME = "Task";
     public static final String ES_NAME = "Tasks";
 
@@ -119,6 +115,8 @@ public class TaskEntityFactory implements EntityFactoryBase<Task> {
      **/
 
     public Entity createEntity(Entity entity) {
+        Objects.requireNonNull(entity, "Entity not found");
+
         TaskBase taskBase = new TaskBase();
 
         Optional<Task> task = this.taskService.create(taskBase);
@@ -135,7 +133,29 @@ public class TaskEntityFactory implements EntityFactoryBase<Task> {
         return entity;
     }
 
+    /**
+     * Update entity based on given parameters
+     *
+     * @param  entity  A {@link Entity} to apply properties to
+     **/
 
+    public void updateEntity(Entity entity) {
+        Objects.requireNonNull(entity, "Entity not found");
+    }
+
+    /**
+     * Delete entity based on given parameters
+     *
+     * @param  entity  A {@link Entity} to apply properties to
+     **/
+
+    public void deleteEntity(Entity entity) {
+        Objects.requireNonNull(entity, "Entity not found");
+
+        Integer existingID = (Integer)entity.getProperty("ID").getValue();
+
+        this.taskService.delete(existingID);
+    }
 
     /**
      * Get all entities
@@ -147,33 +167,9 @@ public class TaskEntityFactory implements EntityFactoryBase<Task> {
         EntityCollection entityCollection = new EntityCollection();
 
         for (Task task : this.taskService.getAll()) {
-            entityCollection.getEntities().add(createEntity(task));
+            entityCollection.getEntities().add(createEntityFrom(task));
         }
 
         return entityCollection;
-    }
-
-    /**
-     * Delete entity based on given parameters
-     *
-     * @param  edmEntityType  A {@link EdmEntityType} to use
-     * @param  keyParams      A list of URI parameters
-     *
-     * @throws ODataApplicationException
-     **/
-
-    public void deleteEntity(EdmEntityType edmEntityType, List<UriParameter> keyParams)
-            throws ODataApplicationException {
-
-        Entity todoEntity = getTodo(edmEntityType, keyParams);
-
-        if (null == todoEntity) {
-            throw new ODataApplicationException("Entity not found",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
-        }
-
-        Integer existingID = (Integer)todoEntity.getProperty("ID").getValue();
-
-        this.todoService.delete(existingID);
     }
 }

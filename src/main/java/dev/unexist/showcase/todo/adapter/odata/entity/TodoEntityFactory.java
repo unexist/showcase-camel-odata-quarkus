@@ -17,16 +17,12 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriParameter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -34,13 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import static dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider.NAMESPACE;
 
 @ApplicationScoped
-public class TodoEntityFactory implements EntityFactoryBase {
+public class TodoEntityFactory extends EntityFactoryBase<Todo> {
     public static final String ET_NAME = "Todo";
     public static final String ES_NAME = "Todos";
 
@@ -88,28 +84,6 @@ public class TodoEntityFactory implements EntityFactoryBase {
     }
 
     /**
-     * Create new entity
-     *
-     * @param  entity  A {@link Entity} to apply properties to
-     *
-     * @return Updated {@link Entity}
-     **/
-
-    public Entity createEntity(Entity entity) {
-        TodoBase todoBase = new TodoBase();
-
-        Optional<Todo> todo = this.todoService.create(todoBase);
-
-        if (todo.isPresent()) {
-            entity.getProperties().add(
-                new Property(null, "ID",
-                        ValueType.PRIMITIVE, todo.get().getId()));
-        }
-
-        return entity;
-    }
-
-    /**
      * Create new entity from given {@link Todo}
      *
      * @param  todo  A {@link Todo} to convert
@@ -132,6 +106,54 @@ public class TodoEntityFactory implements EntityFactoryBase {
     }
 
     /**
+     * Create new entity
+     *
+     * @param  entity  A {@link Entity} to apply properties to
+     *
+     * @return Updated {@link Entity}
+     **/
+
+    public Entity createEntity(Entity entity) {
+        Objects.requireNonNull(entity, "Entity not found");
+
+        TodoBase todoBase = new TodoBase();
+
+        Optional<Todo> todo = this.todoService.create(todoBase);
+
+        if (todo.isPresent()) {
+            entity.getProperties().add(
+                new Property(null, "ID",
+                        ValueType.PRIMITIVE, todo.get().getId()));
+        }
+
+        return entity;
+    }
+
+    /**
+     * Update entity based on given parameters
+     *
+     * @param  entity  A {@link Entity} to apply properties to
+     **/
+
+    public void updateEntity(Entity entity) {
+        Objects.requireNonNull(entity, "Entity not found");
+    }
+
+    /**
+     * Delete entity based on given parameters
+     *
+     * @param  entity  A {@link Entity} to apply properties to
+     **/
+
+    public void deleteEntity(Entity entity) {
+        Objects.requireNonNull(entity, "Entity not found");
+
+        Integer existingID = (Integer)entity.getProperty("ID").getValue();
+
+        this.todoService.delete(existingID);
+    }
+
+    /**
      * Get all entities
      *
      * @return A {@link EntityCollection} with all entries
@@ -145,29 +167,5 @@ public class TodoEntityFactory implements EntityFactoryBase {
         }
 
         return entityCollection;
-    }
-
-    /**
-     * Delete entity based on given parameters
-     *
-     * @param  edmEntityType  A {@link EdmEntityType} to use
-     * @param  keyParams      A list of URI parameters
-     *
-     * @throws ODataApplicationException
-     **/
-
-    public void deleteEntity(EdmEntityType edmEntityType, List<UriParameter> keyParams)
-            throws ODataApplicationException {
-
-        Entity todoEntity = getTodo(edmEntityType, keyParams);
-
-        if (null == todoEntity) {
-            throw new ODataApplicationException("Entity not found",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
-        }
-
-        Integer existingID = (Integer)todoEntity.getProperty("ID").getValue();
-
-        this.todoService.delete(existingID);
     }
 }

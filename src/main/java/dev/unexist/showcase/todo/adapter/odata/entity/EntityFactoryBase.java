@@ -12,35 +12,30 @@ package dev.unexist.showcase.todo.adapter.odata.entity;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriParameter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
-interface EntityFactoryBase<T> {
-    static CsdlEntityType createEntityType() {
+abstract class EntityFactoryBase<T> {
+    public static CsdlEntityType createEntityType() {
         throw new ODataRuntimeException("Unable to create entity type");
     }
 
-    default Entity createEntityFrom(T t) {
+    public Entity createEntityFrom(T t) {
         throw new ODataRuntimeException("Unable to create entity");
     }
 
-    default Entity createEntity(EdmEntityType edmEntityType, Entity entity) {
+    public Entity createEntity(Entity entity) {
         throw new ODataRuntimeException("Unable to create entity");
     }
 
-    void updateEntity(EdmEntityType edmEntityType, Entity entity);
+    public abstract void updateEntity(Entity entity);
 
-    void deleteEntity(EdmEntityType edmEntityType,
-                      List<UriParameter> keyParams) throws ODataApplicationException;
+    public abstract void deleteEntity(Entity entity);
 
-    EntityCollection getAll();
+    public abstract EntityCollection getAll();
 
     /**
      * Create an ID from given values
@@ -51,7 +46,7 @@ interface EntityFactoryBase<T> {
      * @return A newly created {@link URI}
      **/
 
-    default URI createId(String entitySetName, Object id) {
+    static URI createId(String entitySetName, Object id) {
         try {
             return new URI(String.format("%s(%s)", entitySetName, id));
         } catch (URISyntaxException e) {
