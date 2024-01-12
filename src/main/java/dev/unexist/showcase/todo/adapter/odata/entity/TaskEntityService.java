@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider.NAMESPACE;
 
@@ -171,5 +173,24 @@ public class TaskEntityService extends EntityServiceBase<Task> {
         }
 
         return entityCollection;
+    }
+
+    /**
+     * Find all {@link Task} entries by given {@link Predicate}
+     *
+     * @param  filterBy  A {@link Predicate} to use
+     *
+     * @return A {@link EntityCollection} of all {@link Task}; might be empty
+     **/
+
+    public EntityCollection getAllByPredicate(Predicate<Task> filterBy) {
+        EntityCollection collection = new EntityCollection();
+
+        collection.getEntities().addAll(
+                this.taskService.findAllByPredicate(filterBy).stream()
+                        .map(this::createEntityFrom)
+                        .collect(Collectors.toList()));
+
+        return collection;
     }
 }

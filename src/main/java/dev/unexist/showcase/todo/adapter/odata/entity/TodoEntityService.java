@@ -10,6 +10,7 @@
 
 package dev.unexist.showcase.todo.adapter.odata.entity;
 
+import dev.unexist.showcase.todo.domain.task.Task;
 import dev.unexist.showcase.todo.domain.todo.Todo;
 import dev.unexist.showcase.todo.domain.todo.TodoBase;
 import dev.unexist.showcase.todo.domain.todo.TodoService;
@@ -32,6 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider.NAMESPACE;
 
@@ -167,5 +170,24 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
         }
 
         return entityCollection;
+    }
+
+    /**
+     * Find all {@link Task} entries by given {@link Predicate}
+     *
+     * @param  filterBy  A {@link Predicate} to use
+     *
+     * @return A {@link EntityCollection} of all {@link Task}; might be empty
+     **/
+
+    public EntityCollection getAllByPredicate(Predicate<Todo> filterBy) {
+        EntityCollection collection = new EntityCollection();
+
+        collection.getEntities().addAll(
+                this.todoService.findAllByPredicate(filterBy).stream()
+                        .map(this::createEntityFrom)
+                        .collect(Collectors.toList()));
+
+        return collection;
     }
 }
