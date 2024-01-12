@@ -17,6 +17,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @ApplicationScoped
 public class TaskService {
@@ -85,15 +86,15 @@ public class TaskService {
     }
 
     /**
-     * Get all {@link Task} entries by todo id
+     * Find all {@link Task} entries by given {@link Predicate}
      *
-     * @param  todoId  Id to find
+     * @param  filterBy  A {@link Predicate} to use
      *
      * @return List of all {@link Task}; might be empty
      **/
 
-    public List<Task> getAllByTodoId(int todoId) {
-        return this.taskRepository.findAllByPredicate(t -> t.getTodoId() == todoId);
+    public List<Task> findAllByPredicate(Predicate<Task> filterBy) {
+        return this.taskRepository.findAllByPredicate(filterBy);
     }
 
     /**

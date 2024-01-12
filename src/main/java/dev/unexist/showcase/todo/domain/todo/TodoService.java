@@ -12,11 +12,13 @@
 package dev.unexist.showcase.todo.domain.todo;
 
 import dev.unexist.showcase.todo.domain.CrudRepository;
+import dev.unexist.showcase.todo.domain.task.Task;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @ApplicationScoped
 public class TodoService {
@@ -85,15 +87,15 @@ public class TodoService {
     }
 
     /**
-     * Get all {@link Todo} entries by todo id
+     * Find all {@link Task} entries by given {@link Predicate}
      *
-     * @param  todoId  Id to find
+     * @param  filterBy  A {@link Predicate} to use
      *
-     * @return List of all {@link Todo}; might be empty
+     * @return List of all {@link Task}; might be empty
      **/
 
-    public List<Todo> getAllById(int todoId) {
-        return this.todoRepository.findAllByPredicate(t -> t.getId() == todoId);
+    public List<Todo> findAllByPredicate(Predicate<Todo> filterBy) {
+        return this.todoRepository.findAllByPredicate(filterBy);
     }
 
     /**
