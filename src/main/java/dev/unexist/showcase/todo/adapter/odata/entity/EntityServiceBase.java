@@ -17,6 +17,7 @@ import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.function.Predicate;
 
 abstract class EntityServiceBase<T> {
     public static CsdlEntityType createEntityType() {
@@ -36,6 +37,8 @@ abstract class EntityServiceBase<T> {
     public abstract void deleteEntity(Entity entity);
 
     public abstract EntityCollection getAll();
+
+    public abstract EntityCollection getAllByPredicate(Predicate<T> filtyBy);
 
     /**
      * Create an ID from given values
