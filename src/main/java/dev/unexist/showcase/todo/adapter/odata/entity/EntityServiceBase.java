@@ -38,7 +38,7 @@ abstract class EntityServiceBase<T> {
 
     public abstract EntityCollection getAll();
 
-    public abstract EntityCollection getAllByPredicate(Predicate<T> filtyBy);
+    public abstract EntityCollection getAllByPredicate(Predicate<T> filterBy);
 
     /**
      * Create an ID from given values
