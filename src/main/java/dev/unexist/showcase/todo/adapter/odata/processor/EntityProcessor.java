@@ -77,8 +77,6 @@ public class EntityProcessor extends EntityProcessorBase
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) uriResource;
         EdmEntitySet startEdmEntitySet = uriResourceEntitySet.getEntitySet();
 
-        System.out.println("segment=" + segmentCount);
-
         if (1 == segmentCount) {
             responseEdmEntityType = startEdmEntitySet.getEntityType();
             responseEdmEntitySet = startEdmEntitySet;
