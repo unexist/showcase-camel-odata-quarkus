@@ -38,13 +38,14 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
 
         List<CsdlEntityType> entityTypes = new ArrayList<>();
 
-        entityTypes.add(TodoEntityService.createEntityType());
-        entityTypes.add(TaskEntityService.createEntityType());
+        entityTypes.add(getEntityType(TodoEntityService.ET_FQN));
+        entityTypes.add(getEntityType(TaskEntityService.ET_FQN));
 
         schema.setEntityTypes(entityTypes);
         schema.setEntityContainer(getEntityContainer());
 
         List<CsdlSchema> schemas = new ArrayList<>();
+
         schemas.add(schema);
 
         return schemas;
@@ -69,24 +70,39 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
 
         if (CONTAINER.equals(entityContainer)) {
             if (TodoEntityService.ES_NAME.equals(entitySetName)) {
-                CsdlEntitySet entitySet = new CsdlEntitySet();
+                retVal = new CsdlEntitySet();
 
-                entitySet.setName(TodoEntityService.ES_NAME);
-                entitySet.setType(TodoEntityService.ET_FQN);
+                retVal.setName(TodoEntityService.ES_NAME);
+                retVal.setType(TodoEntityService.ET_FQN);
 
                 /* Navigational */
                 CsdlNavigationPropertyBinding navPropBinding = new CsdlNavigationPropertyBinding();
 
-                navPropBinding.setPath(TaskEntityService.ET_NAME);
                 navPropBinding.setTarget(TaskEntityService.ES_NAME);
+                navPropBinding.setPath(TaskEntityService.ET_NAME);
 
                 List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<>();
 
                 navPropBindingList.add(navPropBinding);
 
-                entitySet.setNavigationPropertyBindings(navPropBindingList);
+                retVal.setNavigationPropertyBindings(navPropBindingList);
+            } else if (TaskEntityService.ES_NAME.equals(entitySetName)) {
+                retVal = new CsdlEntitySet();
 
-                retVal = entitySet;
+                retVal.setName(TaskEntityService.ES_NAME);
+                retVal.setType(TaskEntityService.ET_FQN);
+
+                /* Navigational */
+                CsdlNavigationPropertyBinding navPropBinding = new CsdlNavigationPropertyBinding();
+
+                navPropBinding.setTarget(TodoEntityService.ES_NAME);
+                navPropBinding.setPath(TodoEntityService.ET_NAME);
+
+                List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<>();
+
+                navPropBindingList.add(navPropBinding);
+
+                retVal.setNavigationPropertyBindings(navPropBindingList);
             }
         }
 
@@ -96,7 +112,9 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
     @Override
     public CsdlEntityContainer getEntityContainer() {
         List<CsdlEntitySet> entitySets = new ArrayList<>();
+
         entitySets.add(getEntitySet(CONTAINER, TodoEntityService.ES_NAME));
+        entitySets.add(getEntitySet(CONTAINER, TaskEntityService.ES_NAME));
 
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();
 
