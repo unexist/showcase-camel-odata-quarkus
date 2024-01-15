@@ -106,6 +106,27 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
+    @Order(4)
+    public void shouldFindSingleMatchOnly() {
+        createTodo();
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.[\"value\"]")
+                    .isArray()
+                    .hasSize(1);
+    }
+
+    @Test
     public void shouldNotFindEntity() {
         String jsonOut = given()
                 .when()
@@ -123,6 +144,8 @@ public class ODataServletIntegrationTest {
                     .startsWith("Cannot find EntitySet");
     }
 
+
+
     @Test
     public void shouldNotFindAnything() {
         given()
@@ -131,25 +154,6 @@ public class ODataServletIntegrationTest {
                     .get("/odata/Todos(11)")
                 .then()
                     .statusCode(404);
-    }
-
-    @Test
-    public void shouldFindOnlySingleMatch() {
-        createTodo();
-
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.[\"ID\"]")
-                .isEqualTo(1);
     }
 
     @Test
@@ -168,7 +172,7 @@ public class ODataServletIntegrationTest {
 
         assertThatJson(jsonOut)
                 .inPath("$.[\"ID\"]")
-                .isEqualTo(1);
+                    .isEqualTo(1);
     }
 
     @Test
@@ -187,7 +191,7 @@ public class ODataServletIntegrationTest {
 
         assertThatJson(jsonOut)
                 .inPath("$.value")
-                .isEqualTo(1);
+                    .isEqualTo(1);
     }
 
     @Test
