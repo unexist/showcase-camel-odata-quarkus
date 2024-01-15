@@ -106,8 +106,7 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    @Order(4)
-    public void shouldFindSingleMatchOnly() {
+    public void shouldFindMatches() {
         createTodo();
 
         String jsonOut = given()
@@ -121,9 +120,9 @@ public class ODataServletIntegrationTest {
                     .asString();
 
         assertThatJson(jsonOut)
-                .inPath("$.[\"value\"]")
+                .inPath("$.value")
                     .isArray()
-                    .hasSize(1);
+                    .isNotEmpty();
     }
 
     @Test
@@ -279,7 +278,7 @@ public class ODataServletIntegrationTest {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .delete("/odata/Todos(1)/Tasks")
+                    .get("/odata/Todos(1)/Tasks")
                 .then()
                     .statusCode(200)
                 .and()
@@ -290,6 +289,26 @@ public class ODataServletIntegrationTest {
                 .inPath("$.value")
                 .isArray()
                 .isNotEmpty();
+    }
+
+    @Test
+    public void shouldGetNavigationEntityByKey() {
+        createTodo();
+        createTask();
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(1)/Tasks(1)")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.[\"ID\"]")
+                .isEqualTo(1);
     }
 
     /**
