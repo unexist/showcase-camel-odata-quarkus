@@ -116,12 +116,12 @@ public class EntityProcessor extends EntityProcessorBase
             }
         } else {
             throw new ODataApplicationException("Not supported",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
         }
 
         if (null == responseEntity) {
             throw new ODataApplicationException("Nothing found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
         /* 3. Serialize */

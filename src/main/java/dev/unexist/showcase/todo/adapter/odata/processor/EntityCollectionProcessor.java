@@ -33,6 +33,9 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.queryoption.CountOption;
+import org.apache.olingo.server.api.uri.queryoption.SkipOption;
+import org.apache.olingo.server.api.uri.queryoption.TopOption;
 
 import java.util.List;
 import java.util.Locale;
@@ -60,12 +63,13 @@ public class EntityCollectionProcessor extends EntityProcessorBase
 
         /* 1. Retrieve the requested EntitySet from the uriInfo (representation of the parsed URI) */
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
+        CountOption countOption = null;
         int segmentCount = resourceParts.size();
 
         UriResource uriResource = resourceParts.get(0);
         if (!(uriResource instanceof UriResourceEntitySet)) {
           throw new ODataApplicationException("Only EntitySet is supported",
-              HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+              HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
         }
 
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) uriResource;
@@ -73,7 +77,60 @@ public class EntityCollectionProcessor extends EntityProcessorBase
 
         if (1 == segmentCount) {
             responseEdmEntitySet = startEdmEntitySet;
-            responseEntityCollection = this.storage.readEntitySetData(startEdmEntitySet);
+            responseEntityCollection = new EntityCollection();
+
+            /* 2a. Fetch the data from backend */
+            EntityCollection entityCollection = this.storage.readEntitySetData(startEdmEntitySet);
+
+            /* 3. Apply System Query Options */
+            List<Entity> entityList = entityCollection.getEntities();
+
+            /* 3a. Handle $count */
+            countOption = uriInfo.getCountOption();
+
+            if (null != countOption) {
+                boolean isCount = countOption.getValue();
+
+                if (isCount) {
+                    responseEntityCollection.setCount(entityList.size());
+                }
+            }
+
+            /* 3b. Handle $skip */
+            SkipOption skipOption = uriInfo.getSkipOption();
+
+            if (null != skipOption) {
+                int skipNumber = skipOption.getValue();
+
+                if (0 <= skipNumber) {
+                    if(skipNumber <= entityList.size()) {
+                        entityList = entityList.subList(skipNumber, entityList.size());
+                    } else {
+                        entityList.clear();
+                    }
+                } else {
+                    throw new ODataApplicationException("Invalid value for $skip",
+                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+                }
+            }
+
+            /* 3c. Handle $top */
+            TopOption topOption = uriInfo.getTopOption();
+
+            if (topOption != null) {
+                int topNumber = topOption.getValue();
+
+                if (0 <= topNumber) {
+                    if(topNumber <= entityList.size()) {
+                        entityList = entityList.subList(0, topNumber);
+                    }
+                } else {
+                    throw new ODataApplicationException("Invalid value for $top",
+                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+                }
+            }
+
+            responseEntityCollection.getEntities().addAll(entityList);
         } else if (2 == segmentCount) {
             UriResource lastSegment = resourceParts.get(1);
 
@@ -90,14 +147,14 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                     responseEdmEntityType = targetEntityType;
                 }
 
-                /* 2. Fetch the data from backend */
+                /* 2b. Fetch the data from backend */
                 // first fetch the entity where the first segment of the URI points to
                 List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
                 Entity sourceEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
 
                 if (null == sourceEntity) {
                     throw new ODataApplicationException("Entity not found.",
-                            HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+                            HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
                 }
 
                 // then fetch the entity collection where the entity navigates to
@@ -114,7 +171,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         ContextURL contextUrl = null;
         EdmEntityType edmEntityType = null;
 
-        /* 3. Create a serializer based on the requested format (json) */
+        /* 4. Create a serializer based on the requested format (json) */
         if (isContNav(uriInfo)) {
             contextUrl = ContextURL.with().entitySetOrSingletonOrType(
                     request.getRawODataPath()).build();
@@ -126,13 +183,16 @@ public class EntityCollectionProcessor extends EntityProcessorBase
 
         final String id = request.getRawBaseUri() + "/" + responseEdmEntitySet.getName();
         EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
-            .contextURL(contextUrl).id(id).build();
+                .contextURL(contextUrl)
+                .id(id)
+                .count(countOption)
+                .build();
 
         ODataSerializer serializer = this.odata.createSerializer(responseFormat);
         SerializerResult serializerResult = serializer.entityCollection(this.serviceMetadata,
                 edmEntityType, responseEntityCollection, opts);
 
-        /* 4. Configure the response object: set the body, headers and status code */
+        /* 5. Configure the response object: set the body, headers and status code */
         response.setContent(serializerResult.getContent());
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());

@@ -70,14 +70,14 @@ abstract public class EntityProcessorBase {
 
         if (null == edmBindingTarget) {
             throw new ODataApplicationException("Not supported.",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
         }
 
         if (edmBindingTarget instanceof EdmEntitySet) {
             navigationTargetEntitySet = (EdmEntitySet) edmBindingTarget;
         } else {
             throw new ODataApplicationException("Not supported.",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
         }
 
         return navigationTargetEntitySet;
