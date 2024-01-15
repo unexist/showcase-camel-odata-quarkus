@@ -59,21 +59,21 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
                 .setName("Description")
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
-        /* Navigational */
-        CsdlNavigationProperty navProp = new CsdlNavigationProperty()
-                .setName(TaskEntityService.ES_NAME)
-                .setType(TaskEntityService.ET_FQN)
-                .setCollection(true)
-                .setPartner(ET_NAME);
-
-        List<CsdlNavigationProperty> navPropList = new ArrayList<>();
-
-        navPropList.add(navProp);
-
         /* Create CsdlPropertyRef for Key element */
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
 
         propertyRef.setName("ID");
+
+        /* Navigational */
+        CsdlNavigationProperty navProp = new CsdlNavigationProperty()
+                .setName(TaskEntityService.ES_NAME)
+                .setType(TaskEntityService.ET_FQN)
+                .setContainsTarget(true)
+                .setCollection(true);
+
+        List<CsdlNavigationProperty> navPropList = new ArrayList<>();
+
+        navPropList.add(navProp);
 
         /* Configure EntityType */
         CsdlEntityType entityType = new CsdlEntityType();
@@ -124,9 +124,9 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
         Optional<Todo> todo = this.todoService.create(todoBase);
 
         if (todo.isPresent()) {
-            entity.getProperties().add(
-                new Property(null, "ID",
-                        ValueType.PRIMITIVE, todo.get().getId()));
+            entity.addProperty(new Property(null, "ID",
+                    ValueType.PRIMITIVE, todo.get().getId()));
+            entity.setType(ET_FQN.getFullQualifiedNameAsString());
         }
 
         return entity;
@@ -165,9 +165,10 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
     public EntityCollection getAll() {
         EntityCollection entityCollection = new EntityCollection();
 
-        for (Todo todo : this.todoService.getAll()) {
-            entityCollection.getEntities().add(createEntityFrom(todo));
-        }
+        entityCollection.getEntities().addAll(
+                this.todoService.getAll().stream()
+                        .map(this::createEntityFrom)
+                        .collect(Collectors.toUnmodifiableList()));
 
         return entityCollection;
     }
@@ -186,7 +187,7 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
         collection.getEntities().addAll(
                 this.todoService.findAllByPredicate(filterBy).stream()
                         .map(this::createEntityFrom)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toUnmodifiableList()));
 
         return collection;
     }

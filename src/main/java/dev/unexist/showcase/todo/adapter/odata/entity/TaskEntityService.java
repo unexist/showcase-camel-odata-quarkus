@@ -59,6 +59,11 @@ public class TaskEntityService extends EntityServiceBase<Task> {
                 .setName("Title")
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
+        /* Create CsdlPropertyRef for Key element */
+        CsdlPropertyRef propertyRef = new CsdlPropertyRef();
+
+        propertyRef.setName("ID");
+
         /* Navigational */
         CsdlNavigationProperty navProp = new CsdlNavigationProperty()
                 .setName(TodoEntityService.ET_NAME)
@@ -69,11 +74,6 @@ public class TaskEntityService extends EntityServiceBase<Task> {
         List<CsdlNavigationProperty> navPropList = new ArrayList<>();
 
         navPropList.add(navProp);
-
-        /* Create CsdlPropertyRef for Key element */
-        CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-
-        propertyRef.setName("ID");
 
         /* Configure EntityType */
         CsdlEntityType entityType = new CsdlEntityType();
@@ -124,12 +124,11 @@ public class TaskEntityService extends EntityServiceBase<Task> {
         Optional<Task> task = this.taskService.create(taskBase);
 
         if (task.isPresent()) {
-            entity.getProperties().add(
-                new Property(null, "ID",
-                        ValueType.PRIMITIVE, task.get().getId()));
-            entity.getProperties().add(
-                    new Property(null, "TodoID",
-                            ValueType.PRIMITIVE, task.get().getId()));
+            entity.addProperty(new Property(null, "ID",
+                    ValueType.PRIMITIVE, task.get().getId()));
+            entity.addProperty(new Property(null, "TodoID",
+                    ValueType.PRIMITIVE, task.get().getTodoId()));
+            entity.setType(ET_FQN.getFullQualifiedNameAsString());
         }
 
         return entity;
@@ -168,9 +167,10 @@ public class TaskEntityService extends EntityServiceBase<Task> {
     public EntityCollection getAll() {
         EntityCollection entityCollection = new EntityCollection();
 
-        for (Task task : this.taskService.getAll()) {
-            entityCollection.getEntities().add(createEntityFrom(task));
-        }
+        entityCollection.getEntities().addAll(
+                this.taskService.getAll().stream()
+                        .map(this::createEntityFrom)
+                        .collect(Collectors.toUnmodifiableList()));
 
         return entityCollection;
     }
@@ -189,7 +189,7 @@ public class TaskEntityService extends EntityServiceBase<Task> {
         collection.getEntities().addAll(
                 this.taskService.findAllByPredicate(filterBy).stream()
                         .map(this::createEntityFrom)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toUnmodifiableList()));
 
         return collection;
     }
