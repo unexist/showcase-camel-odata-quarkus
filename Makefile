@@ -30,6 +30,8 @@ todo:
 task:
 	@echo $$JSON_TASK | bash
 
+prep: todo task
+
 todo_list:
 	@curl -X 'GET' 'http://localhost:8080/todo' -H 'accept: */*' | jq .
 
