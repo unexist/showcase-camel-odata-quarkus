@@ -103,6 +103,7 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
                 .addProperty(new Property(null, "Description",
                         ValueType.PRIMITIVE, todo.getDescription()));
 
+        entity.setType(ET_FQN.getFullQualifiedNameAsString());
         entity.setId(createId(ES_NAME, todo.getId()));
 
         return entity;
