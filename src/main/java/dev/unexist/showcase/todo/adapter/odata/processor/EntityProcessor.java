@@ -68,6 +68,7 @@ public class EntityProcessor extends EntityProcessorBase
         int segmentCount = resourceParts.size();
 
         UriResource uriResource = resourceParts.get(0); // in our example, the first segment is the EntitySet
+
         if (!(uriResource instanceof UriResourceEntitySet)) {
           throw new ODataApplicationException("Only EntitySet is supported",
               HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
@@ -76,12 +77,15 @@ public class EntityProcessor extends EntityProcessorBase
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) uriResource;
         EdmEntitySet startEdmEntitySet = uriResourceEntitySet.getEntitySet();
 
+        System.out.println("segment=" + segmentCount);
+
         if (1 == segmentCount) {
             responseEdmEntityType = startEdmEntitySet.getEntityType();
             responseEdmEntitySet = startEdmEntitySet;
 
             /* 2. Retrieve the data from backend */
             List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
+
             responseEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
         } else if (segmentCount == 2) {
             UriResource navSegment = resourceParts.get(1);
@@ -103,6 +107,7 @@ public class EntityProcessor extends EntityProcessorBase
 
                 List<UriParameter> navKeyPredicates = uriResourceNavigation.getKeyPredicates();
 
+                /* Retrieve related entities */
                 if (navKeyPredicates.isEmpty()) {
                   responseEntity = this.storage.getRelatedEntity(sourceEntity,
                           responseEdmEntityType);
@@ -123,12 +128,13 @@ public class EntityProcessor extends EntityProcessorBase
 
         /* 3. Serialize */
         ContextURL contextUrl = null;
+
         if (isContNav(uriInfo)) {
-          contextUrl = ContextURL.with().entitySetOrSingletonOrType(request.getRawODataPath()).
-              suffix(ContextURL.Suffix.ENTITY).build();
+            contextUrl = ContextURL.with().entitySetOrSingletonOrType(request.getRawODataPath()).
+                    suffix(ContextURL.Suffix.ENTITY).build();
         } else {
-          contextUrl = ContextURL.with().entitySet(responseEdmEntitySet)
-                  .suffix(ContextURL.Suffix.ENTITY).build();
+            contextUrl = ContextURL.with().entitySet(responseEdmEntitySet)
+                    .suffix(ContextURL.Suffix.ENTITY).build();
         }
 
         EntitySerializerOptions opts = EntitySerializerOptions.with()
