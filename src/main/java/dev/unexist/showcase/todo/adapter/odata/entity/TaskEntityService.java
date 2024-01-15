@@ -61,10 +61,10 @@ public class TaskEntityService extends EntityServiceBase<Task> {
 
         /* Navigational */
         CsdlNavigationProperty navProp = new CsdlNavigationProperty()
-                .setName(TodoEntityService.ES_NAME)
+                .setName(TodoEntityService.ET_NAME)
                 .setType(TodoEntityService.ET_FQN)
-                .setCollection(true)
-                .setPartner(ET_NAME);
+                .setNullable(false)
+                .setPartner(ES_NAME);
 
         List<CsdlNavigationProperty> navPropList = new ArrayList<>();
 

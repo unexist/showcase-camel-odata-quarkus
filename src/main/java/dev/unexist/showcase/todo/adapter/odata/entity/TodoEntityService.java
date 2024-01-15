@@ -61,10 +61,10 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
 
         /* Navigational */
         CsdlNavigationProperty navProp = new CsdlNavigationProperty()
-                .setName(TaskEntityService.ET_NAME)
+                .setName(TaskEntityService.ES_NAME)
                 .setType(TaskEntityService.ET_FQN)
-                .setNullable(false)
-                .setPartner(ES_NAME);
+                .setCollection(true)
+                .setPartner(ET_NAME);
 
         List<CsdlNavigationProperty> navPropList = new ArrayList<>();
 
