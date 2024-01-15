@@ -55,11 +55,12 @@ abstract public class EntityProcessorBase {
                 }
             }
         }
+
         return false;
     }
 
     protected EdmEntitySet getNavigationTargetEntitySet(EdmEntitySet startEdmEntitySet,
-                                                      EdmNavigationProperty edmNavigationProperty)
+                                                        EdmNavigationProperty edmNavigationProperty)
             throws ODataApplicationException {
 
         EdmEntitySet navigationTargetEntitySet = null;

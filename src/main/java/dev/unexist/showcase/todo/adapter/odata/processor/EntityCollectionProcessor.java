@@ -58,7 +58,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         EntityCollection responseEntityCollection = null;
         EdmEntityType responseEdmEntityType = null;
 
-        /* 1. retrieve the requested EntitySet from the uriInfo (representation of the parsed URI) */
+        /* 1. Retrieve the requested EntitySet from the uriInfo (representation of the parsed URI) */
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
         int segmentCount = resourceParts.size();
 
@@ -83,29 +83,31 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                 EdmEntityType targetEntityType = edmNavigationProperty.getType();
 
                 if (!edmNavigationProperty.containsTarget()) {
-                    responseEdmEntitySet = getNavigationTargetEntitySet(startEdmEntitySet, edmNavigationProperty);
+                    responseEdmEntitySet = getNavigationTargetEntitySet(startEdmEntitySet,
+                            edmNavigationProperty);
                 } else {
                     responseEdmEntitySet = startEdmEntitySet;
                     responseEdmEntityType = targetEntityType;
                 }
 
-                // 2. fetch the data from backend
+                /* 2. Fetch the data from backend */
                 // first fetch the entity where the first segment of the URI points to
                 List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
                 Entity sourceEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
 
                 if (null == sourceEntity) {
-                  throw new ODataApplicationException("Entity not found.",
-                      HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+                    throw new ODataApplicationException("Entity not found.",
+                            HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
                 }
+
                 // then fetch the entity collection where the entity navigates to
                 // note: we don't need to check uriResourceNavigation.isCollection(),
                 // because we are the EntityCollectionProcessor
-                responseEntityCollection = this.storage.getRelatedEntityCollection(sourceEntity, targetEntityType);
-
+                responseEntityCollection = this.storage.getRelatedEntityCollection(sourceEntity,
+                        targetEntityType);
             }
         } else {
-            throw new ODataApplicationException("Not supported",
+            throw new ODataApplicationException("Not supported.",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
         }
 
@@ -114,11 +116,12 @@ public class EntityCollectionProcessor extends EntityProcessorBase
 
         /* 3. Create a serializer based on the requested format (json) */
         if (isContNav(uriInfo)) {
-          contextUrl = ContextURL.with().entitySetOrSingletonOrType(request.getRawODataPath()).build();
-          edmEntityType = responseEdmEntityType;
+            contextUrl = ContextURL.with().entitySetOrSingletonOrType(
+                    request.getRawODataPath()).build();
+            edmEntityType = responseEdmEntityType;
         } else {
-          contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).build();
-          edmEntityType = responseEdmEntitySet.getEntityType();
+            contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).build();
+            edmEntityType = responseEdmEntitySet.getEntityType();
         }
 
         final String id = request.getRawBaseUri() + "/" + responseEdmEntitySet.getName();

@@ -222,22 +222,18 @@ public class EntityStorage {
         FullQualifiedName relatedEntityFqn = targetEntityType.getFullQualifiedName();
         String sourceEntityFqn = sourceEntity.getType();
 
-        if (sourceEntityFqn.equals(TodoEntityService.ET_FQN.getFullQualifiedNameAsString())
+        if (TodoEntityService.ET_FQN.getFullQualifiedNameAsString().equals(sourceEntityFqn)
                 && relatedEntityFqn.equals(TaskEntityService.ET_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("ID").getValue();
 
-            System.out.println(todoId);
-
             navigationTargetEntityCollection.getEntities().addAll(
                     this.taskEntityService.getAllByPredicate(t -> t.getTodoId() == todoId)
                             .getEntities());
-        } else if (sourceEntityFqn.equals(TaskEntityService.ET_FQN.getFullQualifiedNameAsString())
+        } else if (TaskEntityService.ET_FQN.getFullQualifiedNameAsString().equals(sourceEntityFqn)
                 && relatedEntityFqn.equals(TodoEntityService.ET_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("TodoID").getValue();
-
-            System.out.println(todoId);
 
             navigationTargetEntityCollection.getEntities().addAll(
                     this.todoEntityService.getAllByPredicate(t -> t.getId() == todoId)
@@ -373,7 +369,7 @@ public class EntityStorage {
             /* Runtime data: the value of the current entity */
             Object valueObject = rt_entity.getProperty(keyName).getValue(); // null-check is done in FWK
 
-            /* Now need to compare the valueObject with the keyText String */
+            /* Now we need to compare the valueObject with the keyText String */
             try {
                 String valueAsString = edmPrimitiveType.valueToString(valueObject, isNullable, maxLength,
                         precision, scale, isUnicode);
@@ -382,7 +378,7 @@ public class EntityStorage {
                     return false;
                 }
             } catch (EdmPrimitiveTypeException e) {
-                throw new ODataApplicationException("Failed to retrieve String value",
+                throw new ODataApplicationException("Failed to retrieve String value.",
                         HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), Locale.ENGLISH, e);
             }
         }
