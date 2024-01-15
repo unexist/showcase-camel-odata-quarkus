@@ -22,7 +22,7 @@ public class TodoFixture {
 
     public static Todo createTodo() {
         return TodoFactory.fromData(0,
-                "string", "string", DATE, DATE);
+                "Todo string", "Todo string", DATE, DATE);
     }
 
     public static String createEntityJSON() throws JsonProcessingException {

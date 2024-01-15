@@ -20,7 +20,7 @@ import dev.unexist.showcase.todo.domain.task.TaskFactory;
 public class TaskFixture {
     public static Task createTask() {
         return TaskFactory.fromData(0,
-                "string", "string", false);
+                "Task string", "Task string", false);
     }
 
     public static String createEntityJSON() throws JsonProcessingException {
