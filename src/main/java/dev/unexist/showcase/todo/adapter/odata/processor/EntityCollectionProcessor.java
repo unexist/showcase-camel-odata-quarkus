@@ -73,7 +73,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
 
         if (1 == segmentCount) {
             responseEdmEntitySet = startEdmEntitySet;
-            responseEntityCollection = storage.readEntitySetData(startEdmEntitySet);
+            responseEntityCollection = this.storage.readEntitySetData(startEdmEntitySet);
         } else if (2 == segmentCount) {
             UriResource lastSegment = resourceParts.get(1);
 
@@ -92,7 +92,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                 // 2. fetch the data from backend
                 // first fetch the entity where the first segment of the URI points to
                 List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-                Entity sourceEntity = storage.readEntityData(startEdmEntitySet, keyPredicates);
+                Entity sourceEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
 
                 if (null == sourceEntity) {
                   throw new ODataApplicationException("Entity not found.",
@@ -101,7 +101,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                 // then fetch the entity collection where the entity navigates to
                 // note: we don't need to check uriResourceNavigation.isCollection(),
                 // because we are the EntityCollectionProcessor
-                responseEntityCollection = storage.getRelatedEntityCollection(sourceEntity, targetEntityType);
+                responseEntityCollection = this.storage.getRelatedEntityCollection(sourceEntity, targetEntityType);
 
             }
         } else {
@@ -125,7 +125,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
             .contextURL(contextUrl).id(id).build();
 
-        ODataSerializer serializer = odata.createSerializer(responseFormat);
+        ODataSerializer serializer = this.odata.createSerializer(responseFormat);
         SerializerResult serializerResult = serializer.entityCollection(this.serviceMetadata,
                 edmEntityType, responseEntityCollection, opts);
 

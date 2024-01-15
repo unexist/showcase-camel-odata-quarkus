@@ -82,7 +82,7 @@ public class EntityProcessor extends EntityProcessorBase
 
             /* 2. Retrieve the data from backend */
             List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-            responseEntity = storage.readEntityData(startEdmEntitySet, keyPredicates);
+            responseEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
         } else if (segmentCount == 2) {
             UriResource navSegment = resourceParts.get(1);
 
@@ -99,15 +99,15 @@ public class EntityProcessor extends EntityProcessorBase
                   }
 
                 List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-                Entity sourceEntity = storage.readEntityData(startEdmEntitySet, keyPredicates);
+                Entity sourceEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
 
                 List<UriParameter> navKeyPredicates = uriResourceNavigation.getKeyPredicates();
 
                 if (navKeyPredicates.isEmpty()) {
-                  responseEntity = storage.getRelatedEntity(sourceEntity,
+                  responseEntity = this.storage.getRelatedEntity(sourceEntity,
                           responseEdmEntityType);
                 } else {
-                  responseEntity = storage.getRelatedEntity(sourceEntity,
+                  responseEntity = this.storage.getRelatedEntity(sourceEntity,
                           responseEdmEntityType, navKeyPredicates);
                 }
             }
@@ -161,7 +161,7 @@ public class EntityProcessor extends EntityProcessorBase
         Entity requestEntity = result.getEntity();
 
         // 2.2 do the creation in backend, which returns the newly created entity
-        Entity createdEntity = storage.createEntityData(edmEntitySet, requestEntity);
+        Entity createdEntity = this.storage.createEntityData(edmEntitySet, requestEntity);
 
         // 3. serialize the response (we have to return the created entity)
         ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
@@ -170,7 +170,8 @@ public class EntityProcessor extends EntityProcessorBase
         EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
 
         ODataSerializer serializer = this.odata.createSerializer(responseFormat);
-        SerializerResult serializedResponse = serializer.entity(serviceMetadata, edmEntityType, createdEntity, options);
+        SerializerResult serializedResponse = serializer.entity(this.serviceMetadata,
+                edmEntityType, createdEntity, options);
 
         //4. configure the response object
         response.setContent(serializedResponse.getContent());
@@ -203,7 +204,7 @@ public class EntityProcessor extends EntityProcessorBase
 
         // Note that this updateEntity()-method is invoked for both PUT or PATCH operations
         HttpMethod httpMethod = request.getMethod();
-        storage.updateEntityData(edmEntitySet, keyPredicates, requestEntity, httpMethod);
+        this.storage.updateEntityData(edmEntitySet, keyPredicates, requestEntity, httpMethod);
 
         //3. configure the response object
         response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
@@ -221,7 +222,7 @@ public class EntityProcessor extends EntityProcessorBase
 
         // 2. delete the data in backend
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-        storage.deleteEntityData(edmEntitySet, keyPredicates);
+        this.storage.deleteEntityData(edmEntitySet, keyPredicates);
 
         //3. configure the response object
         response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
