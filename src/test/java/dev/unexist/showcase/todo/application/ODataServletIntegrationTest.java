@@ -150,7 +150,7 @@ public class ODataServletIntegrationTest {
         given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos(11)")
+                    .get("/odata/Todos(99)")
                 .then()
                     .statusCode(404);
     }
@@ -309,6 +309,68 @@ public class ODataServletIntegrationTest {
         assertThatJson(jsonOut)
                 .inPath("$.[\"ID\"]")
                 .isEqualTo(1);
+    }
+
+    @Test
+    public void shouldGetTopTwoEntities() {
+        createTodo();
+        createTodo();
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos$top=2")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.value")
+                .isArray()
+                .hasSize(2);
+    }
+
+    @Test
+    public void shouldSkipFirstEntity() {
+        createTodo();
+        createTodo();
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos$skip=1")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.value")
+                .isArray()
+                .isNotEmpty();
+    }
+
+    @Test
+    public void shouldCountEntities() {
+        createTodo();
+        createTodo();
+
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos$count=true")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .isObject()
+                    .containsEntry("@odata.count", 3);
     }
 
     /**
