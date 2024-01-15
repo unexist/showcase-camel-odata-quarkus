@@ -99,13 +99,12 @@ public class EntityStorage {
     public Entity readEntityData(EdmEntitySet edmEntitySet, List<UriParameter> keyParams)
             throws ODataApplicationException
     {
-        Entity retVal = null;
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 
         /* Try to find entity */
-        Entity foundEntity = getEntity(edmEntityType, keyParams);
+        Entity retVal = getEntity(edmEntityType, keyParams);
 
-        if (null == foundEntity) {
+        if (null == retVal) {
             throw new ODataApplicationException("Entity not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
@@ -228,6 +227,8 @@ public class EntityStorage {
         {
             int todoId = (Integer) sourceEntity.getProperty("ID").getValue();
 
+            System.out.println(todoId);
+
             navigationTargetEntityCollection.getEntities().addAll(
                     this.taskEntityService.getAllByPredicate(t -> t.getTodoId() == todoId)
                             .getEntities());
@@ -235,6 +236,8 @@ public class EntityStorage {
                 && relatedEntityFqn.equals(TodoEntityService.ET_FQN))
         {
             int todoId = (Integer) sourceEntity.getProperty("TodoID").getValue();
+
+            System.out.println(todoId);
 
             navigationTargetEntityCollection.getEntities().addAll(
                     this.todoEntityService.getAllByPredicate(t -> t.getId() == todoId)
