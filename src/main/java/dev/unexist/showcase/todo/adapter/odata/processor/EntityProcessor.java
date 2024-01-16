@@ -12,11 +12,16 @@
 package dev.unexist.showcase.todo.adapter.odata.processor;
 
 import dev.unexist.showcase.todo.adapter.odata.storage.EntityStorage;
+import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.data.Link;
+import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.commons.api.edm.EdmNavigationPropertyBinding;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpMethod;
@@ -36,6 +41,9 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
+import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 import java.io.InputStream;
 import java.util.List;
@@ -62,6 +70,7 @@ public class EntityProcessor extends EntityProcessorBase
         EdmEntityType responseEdmEntityType = null;
         Entity responseEntity = null;
         EdmEntitySet responseEdmEntitySet = null;
+        ExpandOption expandOption = null;
 
         /* 1. Retrieve the requested Entity: can be "normal" read operation, or navigation (to-one) */
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
@@ -85,6 +94,64 @@ public class EntityProcessor extends EntityProcessorBase
             List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
 
             responseEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
+
+            /* 3b. Handle $expand */
+            expandOption = uriInfo.getExpandOption();
+
+            if (null != expandOption) {
+                EdmNavigationProperty edmNavigationProperty = null;
+                ExpandItem expandItem = expandOption.getExpandItems().get(0);
+
+                if(expandItem.isStar()) {
+                    List<EdmNavigationPropertyBinding> bindings =
+                            startEdmEntitySet.getNavigationPropertyBindings();
+
+                    if(!bindings.isEmpty()) {
+                        EdmNavigationPropertyBinding binding = bindings.get(0);
+                        EdmElement property = startEdmEntitySet.getEntityType()
+                                .getProperty(binding.getPath());
+
+                        if(property instanceof EdmNavigationProperty) {
+                            edmNavigationProperty = (EdmNavigationProperty) property;
+                        }
+                    }
+                } else {
+                    UriResource expandUriResource = expandItem.getResourcePath()
+                            .getUriResourceParts().get(0);
+
+                    if(expandUriResource instanceof UriResourceNavigation) {
+                        edmNavigationProperty = ((UriResourceNavigation) expandUriResource).getProperty();
+                    }
+                }
+
+                if(null != edmNavigationProperty) {
+                    EdmEntityType expandEdmEntityType = edmNavigationProperty.getType();
+                    String navPropName = edmNavigationProperty.getName();
+
+                    // build the inline data
+                    Link link = new Link();
+
+                    link.setTitle(navPropName);
+                    link.setType(Constants.ENTITY_NAVIGATION_LINK_TYPE);
+                    link.setRel(Constants.NS_ASSOCIATION_LINK_REL + navPropName);
+
+                    if(edmNavigationProperty.isCollection()) {
+                        EntityCollection expandEntityCollection = this.storage.getRelatedEntityCollection(
+                                responseEntity, expandEdmEntityType);
+
+                        link.setInlineEntitySet(expandEntityCollection);
+                        link.setHref(expandEntityCollection.getId().toASCIIString());
+                    } else {
+                        Entity expandEntity = this.storage.getRelatedEntity(
+                                responseEntity, expandEdmEntityType);
+
+                        link.setInlineEntity(expandEntity);
+                        link.setHref(expandEntity.getId().toASCIIString());
+                    }
+
+                    responseEntity.getNavigationLinks().add(link);
+                }
+            }
         } else if (segmentCount == 2) {
             UriResource navSegment = resourceParts.get(1);
 
@@ -124,19 +191,34 @@ public class EntityProcessor extends EntityProcessorBase
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
-        /* 3. Create a serializer based on the requested format (json) */
+        /* 3. Apply system query options */
+
+        /* 3a. Handle $select */
+        SelectOption selectOption = uriInfo.getSelectOption();
+
+        /* 4. Create a serializer based on the requested format (json) */
         ContextURL contextUrl = null;
 
+        String selectList = this.odata.createUriHelper().buildContextURLSelectList(
+                responseEdmEntityType, expandOption, selectOption);
+
         if (isContNav(uriInfo)) {
-            contextUrl = ContextURL.with().entitySetOrSingletonOrType(request.getRawODataPath()).
-                    suffix(ContextURL.Suffix.ENTITY).build();
+            contextUrl = ContextURL.with()
+                    .entitySetOrSingletonOrType(request.getRawODataPath())
+                    .selectList(selectList)
+                    .suffix(ContextURL.Suffix.ENTITY).build();
         } else {
-            contextUrl = ContextURL.with().entitySet(responseEdmEntitySet)
+            contextUrl = ContextURL.with()
+                    .entitySet(responseEdmEntitySet)
+                    .selectList(selectList)
                     .suffix(ContextURL.Suffix.ENTITY).build();
         }
 
         EntitySerializerOptions opts = EntitySerializerOptions.with()
-                .contextURL(contextUrl).build();
+                .contextURL(contextUrl)
+                .select(selectOption)
+                .expand(expandOption)
+                .build();
 
         ODataSerializer serializer = this.odata.createSerializer(responseFormat);
         SerializerResult serializerResult = serializer.entity(this.serviceMetadata,
