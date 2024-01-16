@@ -100,4 +100,9 @@ public class TodoListRepository implements CrudRepository<Todo> {
                 .filter(filterBy)
                 .collect(Collectors.toUnmodifiableList());
     }
+
+    @Override
+    public void clear() {
+        this.list.clear();
+    }
 }

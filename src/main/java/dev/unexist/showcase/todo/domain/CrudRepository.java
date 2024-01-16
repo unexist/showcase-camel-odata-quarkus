@@ -84,4 +84,10 @@ public interface CrudRepository<K> {
      **/
 
     List<K> findAllByPredicate(Predicate<K> filterBy);
+
+    /**
+     * Delete all entries from repository
+     **/
+
+    void clear();
 }

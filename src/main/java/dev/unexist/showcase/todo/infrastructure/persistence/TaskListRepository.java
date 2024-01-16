@@ -99,4 +99,9 @@ public class TaskListRepository implements CrudRepository<Task> {
                 .filter(filterBy)
                 .collect(Collectors.toUnmodifiableList());
     }
+
+    @Override
+    public void clear() {
+        this.list.clear();
+    }
 }
