@@ -11,15 +11,19 @@
 package dev.unexist.showcase.todo.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import dev.unexist.showcase.todo.domain.CrudRepository;
+import dev.unexist.showcase.todo.domain.task.Task;
+import dev.unexist.showcase.todo.domain.todo.Todo;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
@@ -29,10 +33,31 @@ import static org.xmlunit.assertj.XmlAssert.assertThat;
 @QuarkusTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ODataServletIntegrationTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ODataServletIntegrationTest.class);
+
+    @Inject
+    CrudRepository<Todo> todoRepository;
+
+    @Inject
+    CrudRepository<Task> taskRepository;
+
+    /* Init */
+    @BeforeEach
+    public void shouldCreateDataViaRest() {
+        this.todoRepository.clear();
+        this.taskRepository.clear();
+
+        this.todoRepository.add(TodoFixture.createTodo());
+        this.todoRepository.add(TodoFixture.createTodo());
+        this.todoRepository.add(TodoFixture.createTodo());
+
+        this.taskRepository.add(TaskFixture.createTask(1));
+        this.taskRepository.add(TaskFixture.createTask(1));
+        this.taskRepository.add(TaskFixture.createTask(2));
+    }
+
+    /* Service documents */
 
     @Test
-    @Order(1)
     public void shouldGetServiceDocumentAsXML() {
         String xmlOut = given()
                 .when()
@@ -51,7 +76,6 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    @Order(2)
     public void shouldGetServiceDocumentAsJSON() {
         String jsonOut = given()
                 .when()
@@ -68,6 +92,8 @@ public class ODataServletIntegrationTest {
                     .containsEntry("@odata.context", "$metadata");
     }
 
+    /* Metadata */
+
     @Test
     public void shouldGetMetadata() {
         String jsonOut = given()
@@ -83,32 +109,11 @@ public class ODataServletIntegrationTest {
         assertThatJson(jsonOut)
                 .inPath("$.[\"OData.Todo\"]..[\"$Type\"]")
                     .isArray()
-                    .contains("OData.Todo.Todo");
-    }
-
-    @Test
-    @Order(3)
-    public void shouldGetEmptyList() {
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.[\"value\"]")
-                    .isArray()
-                    .isEmpty();
+                    .containsAll(Arrays.asList("OData.Todo.Todo", "OData.Todo.Task"));
     }
 
     @Test
     public void shouldFindMatches() {
-        createTodo();
-
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -124,6 +129,8 @@ public class ODataServletIntegrationTest {
                     .isArray()
                     .isNotEmpty();
     }
+
+    /* Find */
 
     @Test
     public void shouldNotFindEntity() {
@@ -143,8 +150,6 @@ public class ODataServletIntegrationTest {
                     .startsWith("Cannot find EntitySet");
     }
 
-
-
     @Test
     public void shouldNotFindAnything() {
         given()
@@ -156,9 +161,27 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    public void shouldFindMatchByKey() {
-        createTodo();
+    public void shouldFindAll() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
 
+        System.out.println(jsonOut);
+
+        assertThatJson(jsonOut)
+                 .inPath("$.value")
+                 .isArray()
+                 .isNotEmpty();
+    }
+
+    @Test
+    public void shouldFindMatchByKey() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -174,27 +197,11 @@ public class ODataServletIntegrationTest {
                     .isEqualTo(1);
     }
 
-    @Test
-    public void shouldGetAttributeID() {
-        createTodo();
-
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos(ID=1)/ID")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.value")
-                    .isEqualTo(1);
-    }
+    /* CRUD Todo */
 
     @Test
-    public void shouldCreateNewEntity() throws JsonProcessingException {
+    @Order(4)
+    public void shouldCreateTodoEntity() throws JsonProcessingException {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -213,29 +220,24 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    public void shouldUpdateAllProperties() throws JsonProcessingException {
-        createTodo();
-
+    public void shouldGetAttributeID() {
         String jsonOut = given()
                 .when()
-                  .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(TodoFixture.createEntityJSON())
-                    .patch("/odata/Todos(1)")
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(ID=1)/ID")
                 .then()
-                    .statusCode(204)
+                    .statusCode(200)
                 .and()
                     .extract()
                     .asString();
 
         assertThatJson(jsonOut)
-                .isEqualTo("");
+                .inPath("$.value")
+                    .isEqualTo(1);
     }
 
     @Test
     public void shouldUpdateSingleProperty() throws JsonProcessingException {
-        createTodo();
-
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -253,13 +255,13 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    public void shouldDeleteEntity() {
-        createTodo();
-
+    public void shouldUpdateAllProperties() throws JsonProcessingException {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .delete("/odata/Todos(1)")
+                    .contentType(ContentType.JSON)
+                    .body(TodoFixture.createEntityJSON())
+                    .patch("/odata/Todos(1)")
                 .then()
                     .statusCode(204)
                 .and()
@@ -271,10 +273,26 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    public void shouldGetNavigationEntities() {
-        createTodo();
-        createTask();
+    @Order(3)
+    public void shouldDeleteEntity() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .delete("/odata/Todos(3)")
+                .then()
+                    .statusCode(204)
+                .and()
+                    .extract()
+                    .asString();
 
+        assertThatJson(jsonOut)
+                .isEqualTo("");
+    }
+
+    /* Navigational */
+
+    @Test
+    public void shouldGetNavigationEntities() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -293,9 +311,6 @@ public class ODataServletIntegrationTest {
 
     @Test
     public void shouldGetNavigationEntityByKey() {
-        createTodo();
-        createTask();
-
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -311,15 +326,31 @@ public class ODataServletIntegrationTest {
                 .isEqualTo(1);
     }
 
-    @Test
-    public void shouldGetTopTwoEntities() {
-        createTodo();
-        createTodo();
+    /* System Queries */
 
+    @Test
+    public void shouldCountEntities() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos$top=2")
+                    .get("/odata/Todos?$count=true")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .isObject()
+                    .containsEntry("@odata.count", 3);
+    }
+
+    @Test
+    public void shouldGetTopTwoEntities() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos?$top=2")
                 .then()
                     .statusCode(200)
                 .and()
@@ -334,13 +365,10 @@ public class ODataServletIntegrationTest {
 
     @Test
     public void shouldSkipFirstEntity() {
-        createTodo();
-        createTodo();
-
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos$skip=1")
+                    .get("/odata/Todos?$skip=1")
                 .then()
                     .statusCode(200)
                 .and()
@@ -351,26 +379,6 @@ public class ODataServletIntegrationTest {
                 .inPath("$.value")
                 .isArray()
                 .isNotEmpty();
-    }
-
-    @Test
-    public void shouldCountEntities() {
-        createTodo();
-        createTodo();
-
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos$count=true")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .isObject()
-                    .containsEntry("@odata.count", 3);
     }
 
     /**
@@ -392,13 +400,13 @@ public class ODataServletIntegrationTest {
      * Create an entry via REST
      **/
 
-    private static void createTask() {
+    private static void createTask(int todoId) {
         given()
                 .when()
                     .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
                     .body(TaskFixture.createTask())
-                    .post("/todo/1/task")
+                    .post(String.format("/todo/%d/task", todoId))
                 .then()
                     .statusCode(201);;
     }
