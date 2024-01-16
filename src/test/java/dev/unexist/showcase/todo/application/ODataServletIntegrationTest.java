@@ -420,4 +420,40 @@ public class ODataServletIntegrationTest {
                     .isObject()
                     .isNotEmpty();
     }
+
+    @Test
+    public void shouldExpandAllEntity() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(1)?$expand=*")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.Task")
+                    .isObject()
+                    .isNotEmpty();
+    }
+
+    @Test
+    public void shouldSelectAndExpandWithNestedSelect() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(1)?$select=Title&$expand=Task($select=Title)")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.Task")
+                    .isObject()
+                    .isNotEmpty();
+    }
 }
