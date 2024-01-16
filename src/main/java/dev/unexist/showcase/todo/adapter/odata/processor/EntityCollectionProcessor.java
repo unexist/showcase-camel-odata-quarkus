@@ -60,10 +60,11 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         EdmEntitySet responseEdmEntitySet = null;
         EntityCollection responseEntityCollection = null;
         EdmEntityType responseEdmEntityType = null;
+        EntityCollection entityCollection = null;
+        CountOption countOption = null;
 
         /* 1. Retrieve the requested EntitySet from the uriInfo (representation of the parsed URI) */
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
-        CountOption countOption = null;
         int segmentCount = resourceParts.size();
 
         UriResource uriResource = resourceParts.get(0);
@@ -77,60 +78,9 @@ public class EntityCollectionProcessor extends EntityProcessorBase
 
         if (1 == segmentCount) {
             responseEdmEntitySet = startEdmEntitySet;
-            responseEntityCollection = new EntityCollection();
 
-            /* 2a. Fetch the data from backend */
-            EntityCollection entityCollection = this.storage.readEntitySetData(startEdmEntitySet);
-
-            /* 3. Apply System Query Options */
-            List<Entity> entityList = entityCollection.getEntities();
-
-            /* 3a. Handle $count */
-            countOption = uriInfo.getCountOption();
-
-            if (null != countOption) {
-                boolean isCount = countOption.getValue();
-
-                if (isCount) {
-                    responseEntityCollection.setCount(entityList.size());
-                }
-            }
-
-            /* 3b. Handle $skip */
-            SkipOption skipOption = uriInfo.getSkipOption();
-
-            if (null != skipOption) {
-                int skipNumber = skipOption.getValue();
-
-                if (0 <= skipNumber) {
-                    if(skipNumber <= entityList.size()) {
-                        entityList = entityList.subList(skipNumber, entityList.size());
-                    } else {
-                        entityList.clear();
-                    }
-                } else {
-                    throw new ODataApplicationException("Invalid value for $skip",
-                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
-                }
-            }
-
-            /* 3c. Handle $top */
-            TopOption topOption = uriInfo.getTopOption();
-
-            if (topOption != null) {
-                int topNumber = topOption.getValue();
-
-                if (0 <= topNumber) {
-                    if(topNumber <= entityList.size()) {
-                        entityList = entityList.subList(0, topNumber);
-                    }
-                } else {
-                    throw new ODataApplicationException("Invalid value for $top",
-                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
-                }
-            }
-
-            responseEntityCollection.getEntities().addAll(entityList);
+            /* 2. Fetch the data from backend */
+            entityCollection = this.storage.readEntitySetData(startEdmEntitySet);
         } else if (2 == segmentCount) {
             UriResource lastSegment = resourceParts.get(1);
 
@@ -147,7 +97,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                     responseEdmEntityType = targetEntityType;
                 }
 
-                /* 2b. Fetch the data from backend */
+                /* 2. Fetch the data from backend */
                 // first fetch the entity where the first segment of the URI points to
                 List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
                 Entity sourceEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
@@ -160,7 +110,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                 // then fetch the entity collection where the entity navigates to
                 // note: we don't need to check uriResourceNavigation.isCollection(),
                 // because we are the EntityCollectionProcessor
-                responseEntityCollection = this.storage.getRelatedEntityCollection(sourceEntity,
+                entityCollection = this.storage.getRelatedEntityCollection(sourceEntity,
                         targetEntityType);
             }
         } else {
@@ -168,10 +118,62 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
         }
 
+        /* 3. Apply System Query Options */
+        responseEntityCollection = new EntityCollection();
+        List<Entity> entityList = entityCollection.getEntities();
+
+        /* 3a. Handle $count */
+        countOption = uriInfo.getCountOption();
+
+        if (null != countOption) {
+            boolean isCount = countOption.getValue();
+
+            if (isCount) {
+                responseEntityCollection.setCount(entityList.size());
+            }
+        }
+
+        /* 3b. Handle $skip */
+        SkipOption skipOption = uriInfo.getSkipOption();
+
+        if (null != skipOption) {
+            int skipNumber = skipOption.getValue();
+
+            if (0 <= skipNumber) {
+                if(skipNumber <= entityList.size()) {
+                    entityList = entityList.subList(skipNumber, entityList.size());
+                } else {
+                    entityList.clear();
+                }
+            } else {
+                throw new ODataApplicationException("Invalid value for $skip",
+                        HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+            }
+        }
+
+        /* 3c. Handle $top */
+        TopOption topOption = uriInfo.getTopOption();
+
+        if (topOption != null) {
+            int topNumber = topOption.getValue();
+
+            if (0 <= topNumber) {
+                if(topNumber <= entityList.size()) {
+                    entityList = entityList.subList(0, topNumber);
+                }
+            } else {
+                throw new ODataApplicationException("Invalid value for $top",
+                        HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+            }
+        }
+
+        /* Update collection */
+        responseEntityCollection.getEntities().addAll(entityList);
+
+        /* 4. Create a serializer based on the requested format (json) */
         ContextURL contextUrl = null;
         EdmEntityType edmEntityType = null;
 
-        /* 4. Create a serializer based on the requested format (json) */
         if (isContNav(uriInfo)) {
             contextUrl = ContextURL.with().entitySetOrSingletonOrType(
                     request.getRawODataPath()).build();
