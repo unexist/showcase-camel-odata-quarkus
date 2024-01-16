@@ -41,6 +41,7 @@ public class ODataServletIntegrationTest {
     CrudRepository<Task> taskRepository;
 
     /* Init */
+
     @BeforeEach
     public void shouldCreateDataViaRest() {
         this.todoRepository.clear();
@@ -97,6 +98,7 @@ public class ODataServletIntegrationTest {
     /* Metadata */
 
     @Test
+    @Order(3)
     public void shouldGetMetadata() {
         String jsonOut = given()
                 .when()
@@ -112,24 +114,6 @@ public class ODataServletIntegrationTest {
                 .inPath("$.[\"OData.Todo\"]..[\"$Type\"]")
                     .isArray()
                     .containsAll(Arrays.asList("OData.Todo.Todo", "OData.Todo.Task"));
-    }
-
-    @Test
-    public void shouldFindMatches() {
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.value")
-                    .isArray()
-                    .isNotEmpty();
     }
 
     /* Find */
@@ -378,37 +362,44 @@ public class ODataServletIntegrationTest {
 
         assertThatJson(jsonOut)
                 .inPath("$.value")
-                .isArray()
-                .isNotEmpty();
+                   .isArray()
+                    .isNotEmpty();
     }
 
-    /**
-     * Create an entry via REST
-     **/
-
-    private static void createTodo() {
-        given()
+    @Test
+    public void shouldSelectFromEntity() {
+        String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(TodoFixture.createTodo())
-                    .post("/todo")
+                    .get("/odata/Todos?$select=Title,Description")
                 .then()
-                    .statusCode(201);
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        System.out.println(jsonOut);
+
+        assertThatJson(jsonOut)
+                .inPath("$.value.[\"ID\"]")
+                .isNull();
     }
 
-    /**
-     * Create an entry via REST
-     **/
-
-    private static void createTask(int todoId) {
-        given()
+    @Test
+    public void shouldSelectAllFromEntity() {
+        String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(TaskFixture.createTask())
-                    .post(String.format("/todo/%d/task", todoId))
+                    .get("/odata/Todos?$select=*")
                 .then()
-                    .statusCode(201);;
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.value")
+                    .isArray()
+                    .isNotEmpty();
     }
 }
