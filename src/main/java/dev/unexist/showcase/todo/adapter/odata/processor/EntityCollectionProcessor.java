@@ -118,7 +118,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
         }
 
-        /* 3. Apply System Query Options */
+        /* 3. Apply system query options */
         responseEntityCollection = new EntityCollection();
         List<Entity> entityList = entityCollection.getEntities();
 
@@ -175,11 +175,14 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         EdmEntityType edmEntityType = null;
 
         if (isContNav(uriInfo)) {
-            contextUrl = ContextURL.with().entitySetOrSingletonOrType(
-                    request.getRawODataPath()).build();
+            contextUrl = ContextURL.with()
+                    .entitySetOrSingletonOrType(request.getRawODataPath())
+                    .build();
             edmEntityType = responseEdmEntityType;
         } else {
-            contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).build();
+            contextUrl = ContextURL.with()
+                    .entitySet(responseEdmEntitySet)
+                    .build();
             edmEntityType = responseEdmEntitySet.getEntityType();
         }
 
