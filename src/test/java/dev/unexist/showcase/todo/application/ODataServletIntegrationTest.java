@@ -402,4 +402,22 @@ public class ODataServletIntegrationTest {
                     .isArray()
                     .isNotEmpty();
     }
+
+    @Test
+    public void shouldExpandEntity() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(1)?$expand=Task")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.Task")
+                    .isObject()
+                    .isNotEmpty();
+    }
 }
