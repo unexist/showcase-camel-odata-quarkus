@@ -30,8 +30,8 @@ public class TodoFixture {
 
         ObjectNode root = mapper.createObjectNode();
 
-        root.put("Title", "string");
-        root.put("Description", "string");
+        root.put("Title", "Todo string");
+        root.put("Description", "Todo string");
 
         return mapper.writeValueAsString(root);
     }
