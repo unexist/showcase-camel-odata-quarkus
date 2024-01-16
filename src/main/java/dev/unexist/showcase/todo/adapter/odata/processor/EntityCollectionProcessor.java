@@ -175,15 +175,15 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         EdmEntityType edmEntityType = null;
 
         if (isContNav(uriInfo)) {
+            edmEntityType = responseEdmEntityType;
             contextUrl = ContextURL.with()
                     .entitySetOrSingletonOrType(request.getRawODataPath())
                     .build();
-            edmEntityType = responseEdmEntityType;
         } else {
+            edmEntityType = responseEdmEntitySet.getEntityType();
             contextUrl = ContextURL.with()
                     .entitySet(responseEdmEntitySet)
                     .build();
-            edmEntityType = responseEdmEntitySet.getEntityType();
         }
 
         final String id = request.getRawBaseUri() + "/" + responseEdmEntitySet.getName();
