@@ -43,7 +43,7 @@ import java.util.Locale;
 
 public class PrimitiveProcessor implements org.apache.olingo.server.api.processor.PrimitiveProcessor {
     private OData odata;
-    private EntityStorage storage;
+    private final EntityStorage storage;
     private ServiceMetadata serviceMetadata;
 
     /**

@@ -124,7 +124,7 @@ public class EntityProcessor extends EntityProcessorBase
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
-        /* 3. Serialize */
+        /* 3. Create a serializer based on the requested format (json) */
         ContextURL contextUrl = null;
 
         if (isContNav(uriInfo)) {
