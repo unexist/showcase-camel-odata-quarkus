@@ -19,7 +19,12 @@ import dev.unexist.showcase.todo.domain.task.TaskFactory;
 
 public class TaskFixture {
     public static Task createTask() {
-        return TaskFactory.fromData(0,
+        return TaskFactory.fromData(0, 0,
+                "Task string", "Task string", false);
+    }
+
+    public static Task createTask(int todoId) {
+        return TaskFactory.fromData(0, todoId,
                 "Task string", "Task string", false);
     }
 
@@ -28,8 +33,8 @@ public class TaskFixture {
 
         ObjectNode root = mapper.createObjectNode();
 
-        root.put("Title", "string");
-        root.put("Description", "string");
+        root.put("Title", "Task string");
+        root.put("Description", "Task string");
 
         return mapper.writeValueAsString(root);
     }

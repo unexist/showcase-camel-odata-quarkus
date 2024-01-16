@@ -17,6 +17,7 @@ public class TaskFactory {
      * Create a new {@link Task} entry from given data
      *
      * @param  id            ID of the entry
+     * @param  todoId        ID of parent {@link Todo} entry
      * @param  title         Title of the entry
      * @param  description   Description of the entry
      * @param  isDone        Whether the entry is marked as done
@@ -24,10 +25,11 @@ public class TaskFactory {
      * @return A newly created {@code Task}
      **/
 
-    public static Task fromData(int id, String title, String description, boolean isDone) {
+    public static Task fromData(int id, int todoId, String title, String description, boolean isDone) {
         Task task = new Task();
 
         task.setId(id);
+        task.setTodoId(todoId);
         task.setTitle(title);
         task.setDescription(description);
         task.setDone(isDone);
