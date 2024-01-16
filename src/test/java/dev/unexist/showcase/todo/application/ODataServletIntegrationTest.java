@@ -58,6 +58,7 @@ public class ODataServletIntegrationTest {
     /* Service documents */
 
     @Test
+    @Order(1)
     public void shouldGetServiceDocumentAsXML() {
         String xmlOut = given()
                 .when()
@@ -76,6 +77,7 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
+    @Order(2)
     public void shouldGetServiceDocumentAsJSON() {
         String jsonOut = given()
                 .when()
@@ -200,7 +202,6 @@ public class ODataServletIntegrationTest {
     /* CRUD Todo */
 
     @Test
-    @Order(4)
     public void shouldCreateTodoEntity() throws JsonProcessingException {
         String jsonOut = given()
                 .when()
