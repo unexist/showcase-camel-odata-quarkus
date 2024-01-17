@@ -11,12 +11,14 @@
 
 package dev.unexist.showcase.todo.adapter.odata;
 
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 
+@QuarkusTest
 public class ODataServletEntityNavigationIT extends ODataServletBaseIT {
 
     /* Navigational */

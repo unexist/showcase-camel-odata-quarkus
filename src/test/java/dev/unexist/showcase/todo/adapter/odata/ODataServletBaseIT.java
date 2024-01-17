@@ -16,15 +16,10 @@ import dev.unexist.showcase.todo.adapter.TodoFixture;
 import dev.unexist.showcase.todo.domain.CrudRepository;
 import dev.unexist.showcase.todo.domain.task.Task;
 import dev.unexist.showcase.todo.domain.todo.Todo;
-import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.TestMethodOrder;
 
 import javax.inject.Inject;
 
-@QuarkusTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ODataServletBaseIT {
 
     @Inject
@@ -36,7 +31,7 @@ public class ODataServletBaseIT {
     /* Init */
 
     @BeforeEach
-    public void shouldCreateDataViaRest() {
+    public void beforeEach() {
         this.todoRepository.clear();
         this.taskRepository.clear();
 

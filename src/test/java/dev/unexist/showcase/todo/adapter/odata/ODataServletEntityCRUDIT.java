@@ -13,13 +13,18 @@ package dev.unexist.showcase.todo.adapter.odata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.unexist.showcase.todo.adapter.TodoFixture;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static io.restassured.RestAssured.given;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 
+@QuarkusTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ODataServletEntityCRUDIT extends ODataServletBaseIT {
 
     /* CRUD Todo */
