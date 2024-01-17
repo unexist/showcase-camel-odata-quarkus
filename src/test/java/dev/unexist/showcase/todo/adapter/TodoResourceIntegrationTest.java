@@ -1,5 +1,5 @@
 /**
- * @package Showcase-Hadoop-CDC-Quarkus
+ * @package Showcase-OData-Quarkus
  *
  * @file Stupid integration test
  * @copyright 2023-present Christoph Kappel <christoph@unexist.dev>
@@ -9,7 +9,7 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo.application;
+package dev.unexist.showcase.todo.adapter;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;

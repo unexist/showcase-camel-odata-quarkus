@@ -9,20 +9,23 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo.application;
+package dev.unexist.showcase.todo.adapter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import dev.unexist.showcase.todo.domain.todo.Todo;
-import dev.unexist.showcase.todo.domain.todo.TodoFactory;
+import dev.unexist.showcase.todo.domain.task.Task;
+import dev.unexist.showcase.todo.domain.task.TaskFactory;
 
-public class TodoFixture {
-    private static final String DATE = "2021-05-07";
+public class TaskFixture {
+    public static Task createTask() {
+        return TaskFactory.fromData(0, 0,
+                "Task string", "Task string", false);
+    }
 
-    public static Todo createTodo() {
-        return TodoFactory.fromData(0,
-                "Todo string", "Todo string", DATE, DATE);
+    public static Task createTask(int todoId) {
+        return TaskFactory.fromData(0, todoId,
+                "Task string", "Task string", false);
     }
 
     public static String createEntityJSON() throws JsonProcessingException {
@@ -30,8 +33,8 @@ public class TodoFixture {
 
         ObjectNode root = mapper.createObjectNode();
 
-        root.put("Title", "Todo string");
-        root.put("Description", "Todo string");
+        root.put("Title", "Task string");
+        root.put("Description", "Task string");
 
         return mapper.writeValueAsString(root);
     }
