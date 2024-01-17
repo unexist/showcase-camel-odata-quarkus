@@ -386,7 +386,26 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    public void shouldSelectAllFromEntity() {
+    public void shouldSelectFromEntityCollection() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos?$select=Title,Description")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        System.out.println(jsonOut);
+
+        assertThatJson(jsonOut)
+                .inPath("$.value.[\"ID\"]")
+                .isNull();
+    }
+
+    @Test
+    public void shouldSelectAllFromEntityCollection() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -422,11 +441,29 @@ public class ODataServletIntegrationTest {
     }
 
     @Test
-    public void shouldExpandAllEntity() {
+    public void shouldExpandEntityCollection() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$expand=*")
+                    .get("/odata/Todos?$expand=Task")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.Task")
+                    .isObject()
+                    .isNotEmpty();
+    }
+
+    @Test
+    public void shouldExpandAllEntityCollection() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos?$expand=*")
                 .then()
                     .statusCode(200)
                 .and()
