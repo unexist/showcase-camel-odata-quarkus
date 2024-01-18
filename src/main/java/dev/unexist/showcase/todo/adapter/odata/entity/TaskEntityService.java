@@ -11,6 +11,7 @@
 
 package dev.unexist.showcase.todo.adapter.odata.entity;
 
+import dev.unexist.showcase.todo.adapter.odata.storage.EntityStorage;
 import dev.unexist.showcase.todo.domain.task.Task;
 import dev.unexist.showcase.todo.domain.task.TaskBase;
 import dev.unexist.showcase.todo.domain.task.TaskService;
@@ -42,6 +43,7 @@ import static dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider.NAME
 public class TaskEntityService extends EntityServiceBase<Task> {
     public static final String ET_NAME = "Task";
     public static final String ES_NAME = "Tasks";
+    public static final String NAV_NAME = "Tasks";
 
     public static final FullQualifiedName ET_FQN = new FullQualifiedName(NAMESPACE, ET_NAME);
 
@@ -103,8 +105,8 @@ public class TaskEntityService extends EntityServiceBase<Task> {
                 .addProperty(new Property(null, "Title",
                         ValueType.PRIMITIVE, task.getTitle()));
 
+        entity.setId(EntityStorage.createId(entity, "ID"));
         entity.setType(ET_FQN.getFullQualifiedNameAsString());
-        entity.setId(createId(ES_NAME, task.getId()));
 
         return entity;
     }

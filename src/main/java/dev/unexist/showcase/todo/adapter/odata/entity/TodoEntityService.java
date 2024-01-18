@@ -10,6 +10,7 @@
 
 package dev.unexist.showcase.todo.adapter.odata.entity;
 
+import dev.unexist.showcase.todo.adapter.odata.storage.EntityStorage;
 import dev.unexist.showcase.todo.domain.task.Task;
 import dev.unexist.showcase.todo.domain.todo.Todo;
 import dev.unexist.showcase.todo.domain.todo.TodoBase;
@@ -42,6 +43,7 @@ import static dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider.NAME
 public class TodoEntityService extends EntityServiceBase<Todo> {
     public static final String ET_NAME = "Todo";
     public static final String ES_NAME = "Todos";
+    public static final String NAV_NAME = "Todo";
 
     public static final FullQualifiedName ET_FQN = new FullQualifiedName(NAMESPACE, ET_NAME);
 
@@ -103,8 +105,8 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
                 .addProperty(new Property(null, "Description",
                         ValueType.PRIMITIVE, todo.getDescription()));
 
+        entity.setId(EntityStorage.createId(entity, "ID"));
         entity.setType(ET_FQN.getFullQualifiedNameAsString());
-        entity.setId(createId(ES_NAME, todo.getId()));
 
         return entity;
     }
