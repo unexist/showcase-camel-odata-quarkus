@@ -128,7 +128,7 @@ public class EntityProcessor extends EntityProcessorBase
                     EdmEntityType expandEdmEntityType = edmNavigationProperty.getType();
                     String navPropName = edmNavigationProperty.getName();
 
-                    // build the inline data
+                    /* Build the inline data */
                     Link link = new Link();
 
                     link.setTitle(navPropName);
