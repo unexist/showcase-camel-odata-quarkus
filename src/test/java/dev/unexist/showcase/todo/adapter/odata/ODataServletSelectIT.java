@@ -27,7 +27,7 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$select=Title,Description")
+                    .get("/odata/Todos(1)?$select=ID,Description")
                 .then()
                     .statusCode(200)
                 .and()
@@ -35,7 +35,7 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
                     .asString();
 
         assertThatJson(jsonOut)
-                .inPath("$.[\"ID\"]")
+                .inPath("$.[\"Title\"]")
                 .isAbsent();
     }
 
@@ -67,7 +67,7 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos?$select=Title,Description")
+                    .get("/odata/Todos?$select=ID,Description")
                 .then()
                     .statusCode(200)
                 .and()
@@ -76,7 +76,7 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
 
         final Object expected = json(String.join(System.lineSeparator(),
                 "{",
-                "\"Title\": \"${json-unit.any-string}\",",
+                "\"ID\": \"${json-unit.any-number}\",",
                 "\"Description\": \"${json-unit.any-string}\"",
                 "}"));
 
