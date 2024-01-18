@@ -105,8 +105,8 @@ public class TaskEntityService extends EntityServiceBase<Task> {
                 .addProperty(new Property(null, "Title",
                         ValueType.PRIMITIVE, task.getTitle()));
 
-        entity.setId(EntityStorage.createId(entity, "ID"));
         entity.setType(ET_FQN.getFullQualifiedNameAsString());
+        entity.setId(EntityStorage.createId(entity, "ID"));
 
         return entity;
     }
