@@ -54,7 +54,7 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
         final Object expectedObject = json(String.join(System.lineSeparator(),
                 "{",
                 "\"@odata.context\": \"${json-unit.ignore}\",",
-                "\"IDD\": \"${json-unit.any-number}\",",
+                "\"ID\": \"${json-unit.any-number}\",",
                 "\"Title\": \"${json-unit.any-string}\",",
                 "\"Description\": \"${json-unit.any-string}\"",
                 "}"));
