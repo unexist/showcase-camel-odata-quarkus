@@ -95,7 +95,9 @@ public class EntityProcessor extends EntityProcessorBase
 
             responseEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
 
-            /* 3b. Handle $expand */
+            /* 3. Apply system query options */
+
+            /* 3a. Handle $expand */
             expandOption = uriInfo.getExpandOption();
 
             if (null != expandOption) {
@@ -191,9 +193,7 @@ public class EntityProcessor extends EntityProcessorBase
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
 
-        /* 3. Apply system query options */
-
-        /* 3a. Handle $select */
+        /* 3b. Handle $select */
         SelectOption selectOption = uriInfo.getSelectOption();
 
         /* 4. Create a serializer based on the requested format (json) */
