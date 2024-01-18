@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.json;
 
 @QuarkusTest
 public class ODataServletSelectIT extends ODataServletBaseIT {
@@ -33,11 +34,32 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
-                .inPath("$.value.[\"ID\"]")
-                .isNull();
+                .inPath("$.[\"ID\"]")
+                .isAbsent();
+    }
+
+    @Test
+    public void shouldSelectAllFromEntity() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(1)?$select=*")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"@odata.context\": \"${json-unit.ignore}\",",
+                "\"IDD\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\",",
+                "\"Description\": \"${json-unit.any-string}\"",
+                "}"));
+
+        assertThatJson(jsonOut).isEqualTo(expectedObject);
     }
 
     @Test
@@ -52,29 +74,17 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
+        final Object expected = json(String.join(System.lineSeparator(),
+                "{",
+                "\"Title\": \"${json-unit.any-string}\",",
+                "\"Description\": \"${json-unit.any-string}\"",
+                "}"));
 
         assertThatJson(jsonOut)
-                .inPath("$.value.[\"ID\"]")
-                .isNull();
-    }
-
-    @Test
-    public void shouldSelectAllFromEntity() {
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos?$select=*")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.value")
-                    .isArray()
-                    .isNotEmpty();
+                .inPath("$.value.[*]")
+                .isArray()
+                .isNotEmpty()
+                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expected));
     }
 
     @Test
@@ -89,10 +99,18 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\",",
+                "\"Description\": \"${json-unit.any-string}\"",
+                "}"));
+
         assertThatJson(jsonOut)
-                .inPath("$.value")
-                    .isArray()
-                    .isNotEmpty();
+                .inPath("$.value.[*]")
+                .isArray()
+                .isNotEmpty()
+                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
