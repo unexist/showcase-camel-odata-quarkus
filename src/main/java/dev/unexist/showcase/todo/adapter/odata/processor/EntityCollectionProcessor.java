@@ -34,6 +34,8 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
+import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
 
@@ -62,6 +64,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         EdmEntityType responseEdmEntityType = null;
         EntityCollection entityCollection = null;
         CountOption countOption = null;
+        ExpandOption expandOption = null;
 
         /* 1. Retrieve the requested EntitySet from the uriInfo (representation of the parsed URI) */
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
@@ -119,6 +122,10 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         }
 
         /* 3. Apply system query options */
+
+        /* 3b. Handle $select */
+        SelectOption selectOption = uriInfo.getSelectOption();
+
         responseEntityCollection = new EntityCollection();
         List<Entity> entityList = entityCollection.getEntities();
 
@@ -176,13 +183,23 @@ public class EntityCollectionProcessor extends EntityProcessorBase
 
         if (isContNav(uriInfo)) {
             edmEntityType = responseEdmEntityType;
+
+            String selectList = this.odata.createUriHelper().buildContextURLSelectList(
+                    edmEntityType, expandOption, selectOption);
+
             contextUrl = ContextURL.with()
                     .entitySetOrSingletonOrType(request.getRawODataPath())
+                    .selectList(selectList)
                     .build();
         } else {
             edmEntityType = responseEdmEntitySet.getEntityType();
+
+            String selectList = this.odata.createUriHelper().buildContextURLSelectList(
+                    edmEntityType, expandOption, selectOption);
+
             contextUrl = ContextURL.with()
                     .entitySet(responseEdmEntitySet)
+                    .selectList(selectList)
                     .build();
         }
 
@@ -191,6 +208,8 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                 .contextURL(contextUrl)
                 .id(id)
                 .count(countOption)
+                .select(selectOption)
+                .expand(expandOption)
                 .build();
 
         ODataSerializer serializer = this.odata.createSerializer(responseFormat);
