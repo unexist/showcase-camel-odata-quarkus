@@ -24,6 +24,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -31,6 +32,8 @@ import org.apache.olingo.server.api.uri.UriParameter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
@@ -227,6 +230,8 @@ public class EntityStorage {
         {
             int todoId = (Integer) sourceEntity.getProperty("ID").getValue();
 
+            navigationTargetEntityCollection.setId(createId(sourceEntity,
+                    "ID", TaskEntityService.NAV_NAME));
             navigationTargetEntityCollection.getEntities().addAll(
                     this.taskEntityService.getAllByPredicate(t -> t.getTodoId() == todoId)
                             .getEntities());
@@ -235,6 +240,8 @@ public class EntityStorage {
         {
             int todoId = (Integer) sourceEntity.getProperty("TodoID").getValue();
 
+            navigationTargetEntityCollection.setId(createId(sourceEntity,
+                    "ID", TodoEntityService.NAV_NAME));
             navigationTargetEntityCollection.getEntities().addAll(
                     this.todoEntityService.getAllByPredicate(t -> t.getId() == todoId)
                             .getEntities());
@@ -384,5 +391,47 @@ public class EntityStorage {
         }
 
         return true;
+    }
+
+    /**
+     * Create an ID from given values
+     *
+     * @param  entity          A #{@link Entity} this uri is for
+     * @param  idPropertyName  Name of the ID property
+     *
+     * @return A newly created {@link URI}
+     **/
+
+    public static URI createId(Entity entity, String idPropertyName) {
+        return createId(entity, idPropertyName, null);
+    }
+
+    public static URI createId(Entity entity, String idPropertyName, String navigationName) {
+        try {
+            final Property property = entity.getProperty(idPropertyName);
+
+            StringBuilder sb = new StringBuilder(getEntitySetName(entity))
+                    .append("(")
+                    .append(property.asPrimitive())
+                    .append(")");
+
+            if(navigationName != null) {
+                sb.append("/").append(navigationName);
+            }
+
+            return new URI(sb.toString());
+        } catch (URISyntaxException e) {
+            throw new ODataRuntimeException("Unable to create (Atom) id for entity: " + entity, e);
+        }
+    }
+
+    public static String getEntitySetName(Entity entity) {
+        if(TodoEntityService.ET_FQN.getFullQualifiedNameAsString().equals(entity.getType())) {
+            return TodoEntityService.ES_NAME;
+        } else if(TaskEntityService.ET_FQN.getFullQualifiedNameAsString().equals(entity.getType())) {
+            return TaskEntityService.ES_NAME;
+        }
+
+        return entity.getType();
     }
 }

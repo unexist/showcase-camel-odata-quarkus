@@ -15,8 +15,6 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.function.Predicate;
 
 abstract class EntityServiceBase<T> {
@@ -39,21 +37,4 @@ abstract class EntityServiceBase<T> {
     public abstract EntityCollection getAll();
 
     public abstract EntityCollection getAllByPredicate(Predicate<T> filterBy);
-
-    /**
-     * Create an ID from given values
-     *
-     * @param  entitySetName   Name for the entity set part in the ID
-     * @param  id              ID part of the created URI
-     *
-     * @return A newly created {@link URI}
-     **/
-
-    static URI createId(String entitySetName, Object id) {
-        try {
-            return new URI(String.format("%s(%s)", entitySetName, id));
-        } catch (URISyntaxException e) {
-            throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
-        }
-    }
 }
