@@ -415,7 +415,7 @@ public class EntityStorage {
                     .append(property.asPrimitive())
                     .append(")");
 
-            if(navigationName != null) {
+            if(null != navigationName) {
                 sb.append("/").append(navigationName);
             }
 
