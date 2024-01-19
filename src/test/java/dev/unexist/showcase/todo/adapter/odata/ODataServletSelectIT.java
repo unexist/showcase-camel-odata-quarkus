@@ -108,9 +108,9 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
 
         assertThatJson(jsonOut)
                 .inPath("$.value.[*]")
-                .isArray()
-                .isNotEmpty()
-                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
+                    .isArray()
+                    .isNotEmpty()
+                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
@@ -118,17 +118,25 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$expand=Task")
+                    .get("/odata/Todos(1)?$expand=Tasks")
                 .then()
                     .statusCode(200)
                 .and()
                     .extract()
                     .asString();
 
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"TodoID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\"",
+                "}"));
+
         assertThatJson(jsonOut)
-                .inPath("$.Task")
-                    .isObject()
-                    .isNotEmpty();
+                .inPath("$.Tasks")
+                    .isArray()
+                    .isNotEmpty()
+                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
