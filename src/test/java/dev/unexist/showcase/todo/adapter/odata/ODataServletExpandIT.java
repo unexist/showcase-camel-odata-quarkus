@@ -17,44 +17,61 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.json;
 
 @QuarkusTest
 public class ODataServletExpandIT extends ODataServletBaseIT {
-
-    @Test
-    public void shouldSelectAllFromEntityCollection() {
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos?$select=*")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.value")
-                    .isArray()
-                    .isNotEmpty();
-    }
 
     @Test
     public void shouldExpandEntity() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$expand=Task")
+                    .get("/odata/Todos(1)?$expand=Tasks")
                 .then()
                     .statusCode(200)
                 .and()
                     .extract()
                     .asString();
 
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"TodoID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\"",
+                "}"));
+
         assertThatJson(jsonOut)
-                .inPath("$.Task")
-                    .isObject()
-                    .isNotEmpty();
+                .inPath("$.Tasks")
+                    .isArray()
+                    .isNotEmpty()
+                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
+    }
+
+    @Test
+    public void shouldExpandAllEntity() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(1)?$expand=*")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"TodoID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\"",
+                "}"));
+
+        assertThatJson(jsonOut)
+                .inPath("$.Tasks")
+                    .isArray()
+                    .isNotEmpty()
+                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
@@ -62,7 +79,7 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos?$expand=Task")
+                    .get("/odata/Todos(1)?$expand=Tasks")
                 .then()
                     .statusCode(200)
                 .and()
@@ -81,24 +98,6 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
                 .when()
                     .accept(ContentType.JSON)
                     .get("/odata/Todos?$expand=*")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.Task")
-                    .isObject()
-                    .isNotEmpty();
-    }
-
-    @Test
-    public void shouldSelectAndExpandWithNestedSelect() {
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$select=Title&$expand=Task($select=Title)")
                 .then()
                     .statusCode(200)
                 .and()
