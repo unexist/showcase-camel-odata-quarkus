@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.json;
 
 @QuarkusTest
 public class ODataServletEntityNavigationIT extends ODataServletBaseIT {
@@ -24,7 +25,7 @@ public class ODataServletEntityNavigationIT extends ODataServletBaseIT {
     /* Navigational */
 
     @Test
-    public void shouldGetNavigationEntities() {
+    public void shouldGetNavigationEntitiesForTodos() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -35,14 +36,45 @@ public class ODataServletEntityNavigationIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"TodoID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\"",
+                "}"));
+
         assertThatJson(jsonOut)
                 .inPath("$.value")
                 .isArray()
-                .isNotEmpty();
+                .isNotEmpty()
+                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
-    public void shouldGetNavigationEntityByKey() {
+    public void shouldGetNavigationEntitiesForTasks() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Tasks(1)/Todo")
+                .then()
+                    .statusCode(200)
+                .and()
+                    .extract()
+                    .asString();
+
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"@odata.context\": \"${json-unit.any-string}\",",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\",",
+                "\"Description\": \"${json-unit.any-string}\"",
+                "}"));
+
+        assertThatJson(jsonOut).isEqualTo(expectedObject);
+    }
+
+    @Test
+    public void shouldGetNavigationEntityByKeyForTasks() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -53,8 +85,14 @@ public class ODataServletEntityNavigationIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        assertThatJson(jsonOut)
-                .inPath("$.[\"ID\"]")
-                .isEqualTo(1);
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"@odata.context\": \"${json-unit.any-string}\",",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"TodoID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\"",
+                "}"));
+
+        assertThatJson(jsonOut).isEqualTo(expectedObject);
     }
 }
