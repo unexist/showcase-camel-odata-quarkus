@@ -72,10 +72,10 @@ public class ODataServletEntityFindIT extends ODataServletBaseIT {
                 "}"));
 
         assertThatJson(jsonOut)
-                 .inPath("$.value")
-                 .isArray()
-                 .isNotEmpty()
-                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
+                .inPath("$.value")
+                    .isArray()
+                    .isNotEmpty()
+                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
