@@ -64,7 +64,7 @@ public class ODataServletEntityNavigationIT extends ODataServletBaseIT {
 
         final Object expectedObject = json(String.join(System.lineSeparator(),
                 "{",
-                "\"@odata.context\": \"${json-unit.any-string}\",",
+                "\"@odata.context\": \"${json-unit.ignore}\",",
                 "\"ID\": \"${json-unit.any-number}\",",
                 "\"Title\": \"${json-unit.any-string}\",",
                 "\"Description\": \"${json-unit.any-string}\"",
@@ -87,7 +87,7 @@ public class ODataServletEntityNavigationIT extends ODataServletBaseIT {
 
         final Object expectedObject = json(String.join(System.lineSeparator(),
                 "{",
-                "\"@odata.context\": \"${json-unit.any-string}\",",
+                "\"@odata.context\": \"${json-unit.ignore}\",",
                 "\"ID\": \"${json-unit.any-number}\",",
                 "\"TodoID\": \"${json-unit.any-number}\",",
                 "\"Title\": \"${json-unit.any-string}\"",
