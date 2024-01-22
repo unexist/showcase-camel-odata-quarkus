@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.json;
 
 @QuarkusTest
 public class ODataServletEntityFindIT extends ODataServletBaseIT {
@@ -63,12 +64,18 @@ public class ODataServletEntityFindIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
+        final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\",",
+                "\"Description\": \"${json-unit.any-string}\"",
+                "}"));
 
         assertThatJson(jsonOut)
                  .inPath("$.value")
                  .isArray()
-                 .isNotEmpty();
+                 .isNotEmpty()
+                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
