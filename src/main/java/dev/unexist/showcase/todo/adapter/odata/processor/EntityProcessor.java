@@ -104,17 +104,27 @@ public class EntityProcessor extends EntityProcessorBase
                 EdmNavigationProperty edmNavigationProperty = null;
                 ExpandItem expandItem = expandOption.getExpandItems().get(0);
 
-                if(expandItem.isStar()) {
+                System.out.println("explen=" + expandOption.getExpandItems().size());
+
+                if (expandItem.isStar()) {
                     List<EdmNavigationPropertyBinding> bindings =
                             startEdmEntitySet.getNavigationPropertyBindings();
 
-                    if(!bindings.isEmpty()) {
-                        EdmNavigationPropertyBinding binding = bindings.get(0);
-                        EdmElement property = startEdmEntitySet.getEntityType()
-                                .getProperty(binding.getPath());
+                    System.out.println("len=" + bindings.size());
 
-                        if(property instanceof EdmNavigationProperty) {
-                            edmNavigationProperty = (EdmNavigationProperty) property;
+                    if (!bindings.isEmpty()) {
+                        /* Lookup bindings */
+                        for (EdmNavigationPropertyBinding binding : bindings) {
+                            EdmElement property = startEdmEntitySet.getEntityType()
+                                    .getProperty(binding.getPath());
+
+                            System.out.println("type=" + (null != property ? property.getType() : "null"));
+
+                            if(property instanceof EdmNavigationProperty) {
+                                edmNavigationProperty = (EdmNavigationProperty) property;
+
+                                break;
+                            }
                         }
                     }
                 } else {
@@ -126,9 +136,11 @@ public class EntityProcessor extends EntityProcessorBase
                     }
                 }
 
-                if(null != edmNavigationProperty) {
+                if (null != edmNavigationProperty) {
                     String navPropName = edmNavigationProperty.getName();
                     EdmEntityType expandEdmEntityType = edmNavigationProperty.getType();
+
+                    System.out.println("navProp=" + navPropName);
 
                     /* Build the inline data */
                     Link link = new Link();
@@ -137,7 +149,7 @@ public class EntityProcessor extends EntityProcessorBase
                     link.setType(Constants.ENTITY_NAVIGATION_LINK_TYPE);
                     link.setRel(Constants.NS_ASSOCIATION_LINK_REL + navPropName);
 
-                    if(edmNavigationProperty.isCollection()) {
+                    if (edmNavigationProperty.isCollection()) {
                         EntityCollection expandEntityCollection = this.storage.getRelatedEntityCollection(
                                 responseEntity, expandEdmEntityType);
 
