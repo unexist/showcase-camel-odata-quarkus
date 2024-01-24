@@ -43,7 +43,7 @@ import static dev.unexist.showcase.todo.adapter.odata.processor.EdmProvider.NAME
 public class TaskEntityService extends EntityServiceBase<Task> {
     public static final String ET_NAME = "Task";
     public static final String ES_NAME = "Tasks";
-    public static final String NAV_NAME = "Tasks";
+    public static final String NAV_NAME = "Task";
 
     public static final FullQualifiedName ET_FQN = new FullQualifiedName(NAMESPACE, ET_NAME);
 
