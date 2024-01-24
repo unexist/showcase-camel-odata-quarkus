@@ -118,6 +118,7 @@ public class EntityProcessor extends EntityProcessorBase
                             EdmElement property = startEdmEntitySet.getEntityType()
                                     .getProperty(binding.getPath());
 
+                            System.out.println("path=" + binding.getPath());
                             System.out.println("type=" + (null != property ? property.getType() : "null"));
 
                             if(property instanceof EdmNavigationProperty) {
@@ -208,11 +209,11 @@ public class EntityProcessor extends EntityProcessorBase
         /* 3b. Handle $select */
         SelectOption selectOption = uriInfo.getSelectOption();
 
-        /* 4. Create a serializer based on the requested format (json) */
-        ContextURL contextUrl = null;
-
         String selectList = this.odata.createUriHelper().buildContextURLSelectList(
                 responseEdmEntityType, expandOption, selectOption);
+
+        /* 4. Create a serializer based on the requested format (json) */
+        ContextURL contextUrl = null;
 
         if (isContNav(uriInfo)) {
             contextUrl = ContextURL.with()
