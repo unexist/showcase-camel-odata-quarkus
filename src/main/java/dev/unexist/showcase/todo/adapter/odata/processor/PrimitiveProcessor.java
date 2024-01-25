@@ -90,7 +90,7 @@ public class PrimitiveProcessor implements org.apache.olingo.server.api.processo
         /* in our example, we know we have only primitive types in our model */
         EdmPrimitiveType edmPropertyType = (EdmPrimitiveType) edmProperty.getType();
 
-        // 2. Retrieve data from backend
+        /* 2. Retrieve data from backend */
         /* 2.1. Retrieve the entity data, for which the property has to be read */
         Entity entity = storage.readEntityData(edmEntitySet, keyPredicates);
         if (null == entity) { // Bad request
