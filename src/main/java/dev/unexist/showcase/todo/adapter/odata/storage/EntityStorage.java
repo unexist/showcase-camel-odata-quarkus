@@ -121,7 +121,7 @@ public class EntityStorage {
      * @param  edmEntitySet   A {@link EdmEntitySet} to use
      * @param  keyParams      A list of URI parameters
      * @param  updateEntity   A {@link Entity} to update
-     * @param  httpMethod
+     * @param  httpMethod     A {@link HttpMethod} for this call
      *
      * @throws ODataApplicationException
      */
