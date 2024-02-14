@@ -11,6 +11,7 @@
 
 package dev.unexist.showcase.todo.adapter.odata.processor;
 
+import dev.unexist.showcase.todo.adapter.odata.entity.TaskEntityService;
 import dev.unexist.showcase.todo.adapter.odata.storage.EntityStorage;
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -118,8 +119,12 @@ public class EntityProcessor extends EntityProcessorBase
                             EdmElement property = startEdmEntitySet.getEntityType()
                                     .getProperty(binding.getPath());
 
+                            EdmElement property2 = startEdmEntitySet.getEntityType()
+                                    .getProperty(TaskEntityService.ES_NAME);
+
                             System.out.println("path=" + binding.getPath());
                             System.out.println("type=" + (null != property ? property.getType() : "null"));
+                            System.out.println("type2=" + (null != property2 ? property2.getType() : "null"));
 
                             if(property instanceof EdmNavigationProperty) {
                                 edmNavigationProperty = (EdmNavigationProperty) property;
