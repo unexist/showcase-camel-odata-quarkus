@@ -146,12 +146,13 @@ public class EntityStorage {
         for (Property existingProp : existingProperties) {
             String propName = existingProp.getName();
 
-            /* Ignore the key properties, they aren't updateable */
+            /* Ignore the key properties, they aren't updatable */
             if (isKey(edmEntityType, propName)) {
                 continue;
             }
 
             Property updateProperty = foundEntity.getProperty(propName);
+
             if (null == updateProperty) {
                 /* If a property has NOT been added to the request payload depending on the
                 HttpMethod, our behavior is different */
@@ -248,7 +249,7 @@ public class EntityStorage {
         }
 
         if (navigationTargetEntityCollection.getEntities().isEmpty()) {
-          return null;
+            return null;
         }
 
         return navigationTargetEntityCollection;
@@ -268,7 +269,7 @@ public class EntityStorage {
     private Entity getEntity(EdmEntityType edmEntityType, List<UriParameter> keyParams)
             throws ODataApplicationException
     {
-        /* Try to find entity */
+        /* FIXME: Try to find entity in a wasteful way */
         Entity foundEntity = null;
 
         if (TodoEntityService.ET_NAME.equals(edmEntityType.getName())) {
@@ -292,7 +293,7 @@ public class EntityStorage {
      * @param  entitySet      A {@link EntityCollection} to use
      * @param  keyParams      A list of URI parameters
      *
-     * @return Either found {@ink Entity}; otherwise {@code null}
+     * @return Either found {@link Entity}; otherwise {@code null}
      * @throws ODataApplicationException
      **/
 
