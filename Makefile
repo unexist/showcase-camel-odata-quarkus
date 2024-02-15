@@ -63,5 +63,8 @@ od-expand:
 od-expand-all:
 	curl -v http://localhost:8080/odata/Todos\(1\)\?\$expand=\* | jq .
 
+od-order:
+	curl -v http://localhost:8080/odata/Todos/?/$orderBy=ID%20desc | jq .
+
 od-create:
 	curl -v -X POST --json '{"Title":"test", "Description":"test"}' http://localhost:8080/odata/Todos | jq .
