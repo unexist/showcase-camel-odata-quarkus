@@ -18,6 +18,7 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -29,15 +30,21 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
+import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 
 import java.util.List;
 import java.util.Locale;
@@ -63,7 +70,6 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         EntityCollection responseEntityCollection = null;
         EdmEntityType responseEdmEntityType = null;
         EntityCollection entityCollection = null;
-        CountOption countOption = null;
         ExpandOption expandOption = null;
 
         /* 1. Retrieve the requested EntitySet from the uriInfo (representation of the parsed URI) */
@@ -122,15 +128,59 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         }
 
         /* 3. Apply system query options */
+        List<Entity> entityList = entityCollection.getEntities();
+
+        /* 3a. Handle $orderby */
+        OrderByOption orderByOption = uriInfo.getOrderByOption();
+
+        if (null != orderByOption) {
+            List<OrderByItem> orderItemList = orderByOption.getOrders();
+            final OrderByItem orderByItem = orderItemList.get(0); // in our example we support only one
+
+            Expression expression = orderByItem.getExpression();
+
+            if (expression instanceof Member) {
+                UriInfoResource expResourcePath = ((Member)expression).getResourcePath();
+                UriResource expUriResource = expResourcePath.getUriResourceParts().get(0);
+
+                if (expUriResource instanceof UriResourcePrimitiveProperty) {
+                    EdmProperty edmProperty = ((UriResourcePrimitiveProperty)expUriResource).getProperty();
+                    final String sortPropertyName = edmProperty.getName();
+
+                    /* Delegate the sorting to the native sorter of Integer and String */
+                    entityList.sort((entity1, entity2) -> {
+                        int compareResult = 0;
+
+                        if (sortPropertyName.equals("ID")) {
+                            Integer integer1 = (Integer) entity1.getProperty(sortPropertyName).getValue();
+                            Integer integer2 = (Integer) entity2.getProperty(sortPropertyName).getValue();
+
+                            compareResult = integer1.compareTo(integer2);
+                        } else {
+                            String propertyValue1 = (String) entity1.getProperty(sortPropertyName).getValue();
+                            String propertyValue2 = (String) entity2.getProperty(sortPropertyName).getValue();
+
+                            compareResult = propertyValue1.compareTo(propertyValue2);
+                        }
+
+                        /* If 'desc' is specified in the URI, change the order of the list */
+                        if (orderByItem.isDescending()) {
+                            return -compareResult;
+                        }
+
+                        return compareResult;
+                    });
+                }
+            }
+        }
 
         /* 3b. Handle $select */
         SelectOption selectOption = uriInfo.getSelectOption();
 
         responseEntityCollection = new EntityCollection();
-        List<Entity> entityList = entityCollection.getEntities();
 
-        /* 3a. Handle $count */
-        countOption = uriInfo.getCountOption();
+        /* 3c. Handle $count */
+        CountOption countOption = uriInfo.getCountOption();
 
         if (null != countOption) {
             boolean isCount = countOption.getValue();
@@ -140,7 +190,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3b. Handle $skip */
+        /* 3d. Handle $skip */
         SkipOption skipOption = uriInfo.getSkipOption();
 
         if (null != skipOption) {
@@ -158,7 +208,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3c. Handle $top */
+        /* 3e. Handle $top */
         TopOption topOption = uriInfo.getTopOption();
 
         if (topOption != null) {
