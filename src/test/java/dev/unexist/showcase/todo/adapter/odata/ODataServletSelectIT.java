@@ -74,7 +74,7 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        final Object expected = json(String.join(System.lineSeparator(),
+        final Object expectedObject = json(String.join(System.lineSeparator(),
                 "{",
                 "\"ID\": \"${json-unit.any-number}\",",
                 "\"Description\": \"${json-unit.any-string}\"",
@@ -84,7 +84,7 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
                 .inPath("$.value.[*]")
                 .isArray()
                 .isNotEmpty()
-                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expected));
+                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
