@@ -91,7 +91,7 @@ public class ODataServletEntityFindIT extends ODataServletBaseIT {
                     .asString();
 
         assertThatJson(jsonOut)
-                .inPath("$.[\"ID\"]")
-                    .isEqualTo(1);
+                .isObject()
+                    .node("ID").isEqualTo(1);
     }
 }
