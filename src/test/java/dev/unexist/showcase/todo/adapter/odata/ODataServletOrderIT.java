@@ -38,7 +38,7 @@ public class ODataServletOrderIT extends ODataServletBaseIT {
 
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
-                .isArray()
-                .isEqualTo(json("[3,2,1]"));
+                    .isArray()
+                    .isEqualTo(json("[3,2,1]"));
     }
 }
