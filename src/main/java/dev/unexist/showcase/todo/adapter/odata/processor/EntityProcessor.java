@@ -105,13 +105,9 @@ public class EntityProcessor extends EntityProcessorBase
                 EdmNavigationProperty edmNavigationProperty = null;
                 ExpandItem expandItem = expandOption.getExpandItems().get(0);
 
-                System.out.println("explen=" + expandOption.getExpandItems().size());
-
                 if (expandItem.isStar()) {
                     List<EdmNavigationPropertyBinding> bindings =
                             startEdmEntitySet.getNavigationPropertyBindings();
-
-                    System.out.println("len=" + bindings.size());
 
                     if (!bindings.isEmpty()) {
                         /* Lookup bindings */
@@ -121,10 +117,6 @@ public class EntityProcessor extends EntityProcessorBase
 
                             EdmElement property2 = startEdmEntitySet.getEntityType()
                                     .getProperty(TaskEntityService.ES_NAME);
-
-                            System.out.println("path=" + binding.getPath());
-                            System.out.println("type=" + (null != property ? property.getType() : "null"));
-                            System.out.println("type2=" + (null != property2 ? property2.getType() : "null"));
 
                             if(property instanceof EdmNavigationProperty) {
                                 edmNavigationProperty = (EdmNavigationProperty) property;
@@ -145,8 +137,6 @@ public class EntityProcessor extends EntityProcessorBase
                 if (null != edmNavigationProperty) {
                     String navPropName = edmNavigationProperty.getName();
                     EdmEntityType expandEdmEntityType = edmNavigationProperty.getType();
-
-                    System.out.println("navProp=" + navPropName);
 
                     /* Build the inline data */
                     Link link = new Link();
