@@ -79,7 +79,7 @@ public class EdmProvider extends CsdlAbstractEdmProvider {
                 CsdlNavigationPropertyBinding navPropBinding = new CsdlNavigationPropertyBinding();
 
                 navPropBinding.setTarget(TaskEntityService.ES_NAME);
-                navPropBinding.setPath(TaskEntityService.ET_NAME);
+                navPropBinding.setPath(TaskEntityService.ES_NAME);
 
                 List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<>();
 
