@@ -38,14 +38,17 @@ import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -107,7 +110,6 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                 }
 
                 /* 2. Fetch the data from backend */
-                // first fetch the entity where the first segment of the URI points to
                 List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
                 Entity sourceEntity = this.storage.readEntityData(startEdmEntitySet, keyPredicates);
 
@@ -116,9 +118,6 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                             HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
                 }
 
-                // then fetch the entity collection where the entity navigates to
-                // note: we don't need to check uriResourceNavigation.isCollection(),
-                // because we are the EntityCollectionProcessor
                 entityCollection = this.storage.getRelatedEntityCollection(sourceEntity,
                         targetEntityType);
             }
@@ -130,7 +129,36 @@ public class EntityCollectionProcessor extends EntityProcessorBase
         /* 3. Apply system query options */
         List<Entity> entityList = entityCollection.getEntities();
 
-        /* 3a. Handle $orderby */
+        /* 3a. Handle $filter */
+        FilterOption filterOption = uriInfo.getFilterOption();
+
+        if (null != filterOption) {
+            try {
+                Iterator<Entity> entityIterator = entityList.iterator();
+
+                while (entityIterator.hasNext()) {
+                    Entity currentEntity = entityIterator.next();
+                    Expression filterExpression = filterOption.getExpression();
+                    FilterExpressionVisitor expressionVisitor = new FilterExpressionVisitor(currentEntity);
+
+                    Object visitorResult = filterExpression.accept(expressionVisitor);
+
+                    if (visitorResult instanceof Boolean) {
+                        if (!Boolean.TRUE.equals(visitorResult)) {
+                            entityIterator.remove();
+                        }
+                    } else {
+                        throw new ODataApplicationException("A filter expression must evaluate to type Edm.Boolean",
+                                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+                    }
+                }
+            } catch (ExpressionVisitException e) {
+                throw new ODataApplicationException("Exception in filter evaluation",
+                        HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), Locale.ENGLISH);
+            }
+        }
+
+        /* 3b. Handle $orderby */
         OrderByOption orderByOption = uriInfo.getOrderByOption();
 
         if (null != orderByOption) {
@@ -178,12 +206,12 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3b. Handle $select */
+        /* 3c. Handle $select */
         SelectOption selectOption = uriInfo.getSelectOption();
 
         responseEntityCollection = new EntityCollection();
 
-        /* 3c. Handle $count */
+        /* 3d. Handle $count */
         CountOption countOption = uriInfo.getCountOption();
 
         if (null != countOption) {
@@ -194,7 +222,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3d. Handle $skip */
+        /* 3e. Handle $skip */
         SkipOption skipOption = uriInfo.getSkipOption();
 
         if (null != skipOption) {
@@ -212,7 +240,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3e. Handle $top */
+        /* 3f. Handle $top */
         TopOption topOption = uriInfo.getTopOption();
 
         if (topOption != null) {
