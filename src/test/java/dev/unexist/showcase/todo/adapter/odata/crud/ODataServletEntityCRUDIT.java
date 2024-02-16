@@ -9,10 +9,11 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo.adapter.odata;
+package dev.unexist.showcase.todo.adapter.odata.crud;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.unexist.showcase.todo.adapter.TodoFixture;
+import dev.unexist.showcase.todo.adapter.odata.ODataServletBaseIT;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.MethodOrderer;

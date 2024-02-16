@@ -9,8 +9,9 @@
  * See the file LICENSE for details.
  **/
 
-package dev.unexist.showcase.todo.adapter.odata;
+package dev.unexist.showcase.todo.adapter.odata.crud;
 
+import dev.unexist.showcase.todo.adapter.odata.ODataServletBaseIT;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
@@ -20,14 +21,44 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.json;
 
 @QuarkusTest
-public class ODataServletExpandIT extends ODataServletBaseIT {
+public class ODataServletEntityFindIT extends ODataServletBaseIT {
+
+    /* Find */
 
     @Test
-    public void shouldExpandEntity() {
+    public void shouldNotFindEntity() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$expand=Tasks")
+                    .get("/odata/Products")
+                .then()
+                    .statusCode(404)
+                .and()
+                    .extract()
+                    .asString();
+
+        assertThatJson(jsonOut)
+                .inPath("$.[\"error\"].message")
+                    .isString()
+                    .startsWith("Cannot find EntitySet");
+    }
+
+    @Test
+    public void shouldNotFindAnything() {
+        given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos(99)")
+                .then()
+                    .statusCode(404);
+    }
+
+    @Test
+    public void shouldFindAll() {
+        String jsonOut = given()
+                .when()
+                    .accept(ContentType.JSON)
+                    .get("/odata/Todos")
                 .then()
                     .statusCode(200)
                 .and()
@@ -37,49 +68,23 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
         final Object expectedObject = json(String.join(System.lineSeparator(),
                 "{",
                 "\"ID\": \"${json-unit.any-number}\",",
-                "\"TodoID\": \"${json-unit.any-number}\",",
-                "\"Title\": \"${json-unit.any-string}\"",
+                "\"Title\": \"${json-unit.any-string}\",",
+                "\"Description\": \"${json-unit.any-string}\"",
                 "}"));
 
         assertThatJson(jsonOut)
-                .inPath("$.Tasks")
+                .inPath("$.value")
                     .isArray()
                     .isNotEmpty()
                     .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
-    public void shouldExpandAllEntity() {
+    public void shouldFindMatchByKey() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$expand=*")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        final Object expectedObject = json(String.join(System.lineSeparator(),
-                "{",
-                "\"ID\": \"${json-unit.any-number}\",",
-                "\"TodoID\": \"${json-unit.any-number}\",",
-                "\"Title\": \"${json-unit.any-string}\"",
-                "}"));
-
-        assertThatJson(jsonOut)
-                .inPath("$.Tasks")
-                    .isArray()
-                    .isNotEmpty()
-                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
-    }
-
-    @Test
-    public void shouldExpandEntityCollection() {
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$expand=Tasks")
+                    .get("/odata/Todos(ID=1)")
                 .then()
                     .statusCode(200)
                 .and()
@@ -87,26 +92,7 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
                     .asString();
 
         assertThatJson(jsonOut)
-                .inPath("$.Task")
-                    .isObject()
-                    .isNotEmpty();
-    }
-
-    @Test
-    public void shouldExpandAllEntityCollection() {
-        String jsonOut = given()
-                .when()
-                    .accept(ContentType.JSON)
-                    .get("/odata/Todos?$expand=*")
-                .then()
-                    .statusCode(200)
-                .and()
-                    .extract()
-                    .asString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.Task")
-                    .isObject()
-                    .isNotEmpty();
+                .isObject()
+                    .node("ID").isEqualTo(1);
     }
 }
