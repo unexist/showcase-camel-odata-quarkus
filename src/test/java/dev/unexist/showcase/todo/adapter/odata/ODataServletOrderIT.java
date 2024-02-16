@@ -34,8 +34,6 @@ public class ODataServletOrderIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
