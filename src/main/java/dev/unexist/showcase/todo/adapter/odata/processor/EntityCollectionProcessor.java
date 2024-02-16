@@ -152,13 +152,17 @@ public class EntityCollectionProcessor extends EntityProcessorBase
                         int compareResult = 0;
 
                         if (sortPropertyName.equals("ID")) {
-                            Integer integer1 = (Integer) entity1.getProperty(sortPropertyName).getValue();
-                            Integer integer2 = (Integer) entity2.getProperty(sortPropertyName).getValue();
+                            Integer integer1 = (Integer) entity1.getProperty(
+                                    sortPropertyName).getValue();
+                            Integer integer2 = (Integer) entity2.getProperty(
+                                    sortPropertyName).getValue();
 
                             compareResult = integer1.compareTo(integer2);
                         } else {
-                            String propertyValue1 = (String) entity1.getProperty(sortPropertyName).getValue();
-                            String propertyValue2 = (String) entity2.getProperty(sortPropertyName).getValue();
+                            String propertyValue1 = String.valueOf(
+                                    entity1.getProperty(sortPropertyName).getValue());
+                            String propertyValue2 = String.valueOf(
+                                    entity2.getProperty(sortPropertyName).getValue());
 
                             compareResult = propertyValue1.compareTo(propertyValue2);
                         }
