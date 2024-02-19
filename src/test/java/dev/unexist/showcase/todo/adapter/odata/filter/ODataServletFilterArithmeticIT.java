@@ -35,12 +35,10 @@ public class ODataServletFilterArithmeticIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[1]"));
     }
 
 
@@ -56,12 +54,10 @@ public class ODataServletFilterArithmeticIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[2]"));
     }
 
     @Test
@@ -76,14 +72,11 @@ public class ODataServletFilterArithmeticIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[1]"));
     }
-
 
     @Test
     public void shouldFilterMulEqual() {
@@ -97,12 +90,10 @@ public class ODataServletFilterArithmeticIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[1]"));
     }
 
     @Test
@@ -117,11 +108,9 @@ public class ODataServletFilterArithmeticIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[2]"));
     }
 }
