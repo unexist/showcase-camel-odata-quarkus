@@ -165,7 +165,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         Object retVal = null;
 
         if (left.getClass().equals(right.getClass()) && left instanceof Comparable) {
-            int result;
+            int result = 0;
 
             if (left instanceof Integer) {
                 result = ((Comparable<Integer>) (Integer) left).compareTo((Integer) right);
