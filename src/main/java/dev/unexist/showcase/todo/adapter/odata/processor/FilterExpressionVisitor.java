@@ -281,7 +281,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                                         Expression expression)
             throws ODataApplicationException
     {
-        throw new ODataApplicationException("Lamdba expressions are not implemented",
+        throw new ODataApplicationException("Lambda expressions are not implemented",
                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
     }
 
@@ -289,7 +289,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     public Object visitLambdaReference(String variableName)
             throws ODataApplicationException
     {
-        throw new ODataApplicationException("Lamdba references are not implemented",
+        throw new ODataApplicationException("Lambda references are not implemented",
                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
     }
 }
