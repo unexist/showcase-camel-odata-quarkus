@@ -35,14 +35,11 @@ public class ODataServletFilterComparisonIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[1]"));
     }
-
 
     @Test
     public void shouldFilterNotEqual() {
@@ -56,12 +53,10 @@ public class ODataServletFilterComparisonIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[2, 3]"));
     }
 
     @Test
@@ -76,14 +71,11 @@ public class ODataServletFilterComparisonIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[1,2,3]"));
     }
-
 
     @Test
     public void shouldFilterLessThan() {
@@ -97,12 +89,10 @@ public class ODataServletFilterComparisonIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[1,2]"));
     }
 
     @Test
@@ -117,12 +107,10 @@ public class ODataServletFilterComparisonIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[1]"));
     }
 
     @Test
@@ -137,11 +125,9 @@ public class ODataServletFilterComparisonIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[2,3]"));
     }
 }
