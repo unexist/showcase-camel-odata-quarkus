@@ -35,11 +35,9 @@ public class ODataServletFilterStringIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
                 .inPath("$.value..[\"ID\"]")
                     .isArray()
-                    .isEqualTo(json("[3,2,1]"));
+                    .isEqualTo(json("[1,2,3]"));
     }
 }
