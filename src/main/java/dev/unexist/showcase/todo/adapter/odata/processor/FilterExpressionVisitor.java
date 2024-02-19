@@ -88,6 +88,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     {
         Object retVal = null;
 
+        System.out.println(operator);
+
         if (UnaryOperatorKind.NOT == operator && operand instanceof Boolean) {
             retVal = !(Boolean) operand;
         } else if (UnaryOperatorKind.MINUS == operator && operand instanceof Integer) {
@@ -160,6 +162,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     private Object evaluateComparisonOperation(BinaryOperatorKind operator, Object left, Object right)
             throws ODataApplicationException
     {
+        Object retVal = null;
+
         if (left.getClass().equals(right.getClass()) && left instanceof Comparable) {
             int result;
 
@@ -174,72 +178,73 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                         HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), Locale.ENGLISH);
             }
 
-            if (operator == BinaryOperatorKind.EQ) {
-                return result == 0;
-            } else if (operator == BinaryOperatorKind.NE) {
-                return result != 0;
-            } else if (operator == BinaryOperatorKind.GE) {
-                return result >= 0;
-            } else if (operator == BinaryOperatorKind.GT) {
-                return result > 0;
-            } else if (operator == BinaryOperatorKind.LE) {
-                return result <= 0;
-            } else {
-                // BinaryOperatorKind.LT
-                return result < 0;
+            switch (operator) {
+                case EQ: retVal = 0 == result; break;
+                case NE: retVal = 0 != result; break;
+                case GE: retVal = 0 <= result; break;
+                case GT: retVal = 0 <  result; break;
+                case LE: retVal = 0 >= result; break;
+                case LT: retVal = 0 >  result; break;
             }
         } else {
             throw new ODataApplicationException("Comparison needs two equal types",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
         }
+
+        return retVal;
     }
 
     private Object evaluateArithmeticOperation(BinaryOperatorKind operator,
                                                Object left, Object right)
             throws ODataApplicationException
     {
+        Object retVal = null;
+
         if (left instanceof Integer && right instanceof Integer) {
             Integer valueLeft = (Integer) left;
             Integer valueRight = (Integer) right;
 
             /* Calculate the result value */
-            if (operator == BinaryOperatorKind.ADD) {
-                return valueLeft + valueRight;
-            } else if (operator == BinaryOperatorKind.SUB) {
-                return valueLeft - valueRight;
-            } else if (operator == BinaryOperatorKind.MUL) {
-                return valueLeft * valueRight;
-            } else if (operator == BinaryOperatorKind.DIV) {
-                return valueLeft / valueRight;
-            } else {
-                // BinaryOperatorKind.MOD
-                return valueLeft % valueRight;
+            switch (operator) {
+                case ADD: retVal = valueLeft + valueRight; break;
+                case SUB: retVal = valueLeft - valueRight; break;
+                case MUL: retVal = valueLeft * valueRight; break;
+                case DIV: retVal = valueLeft / valueRight; break;
+                case MOD: retVal = valueLeft % valueRight; break;
             }
         } else {
             throw new ODataApplicationException("Arithmetic operations needs two numeric operands",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
         }
+
+        return retVal;
     }
 
     @Override
     public Object visitMethodCall(MethodKind methodCall, List<Object> parameters)
             throws ODataApplicationException
     {
-        /* Implement method calls */
-        if (MethodKind.CONTAINS == methodCall) {
-            if (parameters.get(0) instanceof String && parameters.get(1) instanceof String) {
-                String valueParam1 = (String) parameters.get(0);
-                String valueParam2 = (String) parameters.get(1);
+        Object retVal = null;
 
-                return valueParam1.contains(valueParam2);
-            } else {
-                throw new ODataApplicationException("Contains needs two parameters of type Edm.String",
-                        HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
-            }
-        } else {
-            throw new ODataApplicationException("Method call " + methodCall + " not implemented",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
+        /* Implement method calls */
+        switch (methodCall) {
+            case CONTAINS:
+                if (parameters.get(0) instanceof String && parameters.get(1) instanceof String) {
+                    String valueParam1 = (String) parameters.get(0);
+                    String valueParam2 = (String) parameters.get(1);
+
+                    retVal = valueParam1.contains(valueParam2);
+                } else {
+                    throw new ODataApplicationException("Contains needs two parameters of type Edm.String",
+                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+                };
+                break;
+            default:
+                throw new ODataApplicationException("Method call " + methodCall + " not implemented",
+                        HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
         }
+
+        return retVal;
     }
 
     @Override
@@ -282,7 +287,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     @Override
     public Object visitLambdaReference(String variableName)
-            throws ODataApplicationException {
+            throws ODataApplicationException
+    {
         throw new ODataApplicationException("Lamdba references are not implemented",
                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
     }
