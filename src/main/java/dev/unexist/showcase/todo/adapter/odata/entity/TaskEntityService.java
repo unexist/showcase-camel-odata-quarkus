@@ -71,7 +71,7 @@ public class TaskEntityService extends EntityServiceBase<Task> {
                 .setName(TodoEntityService.ET_NAME)
                 .setType(TodoEntityService.ET_FQN)
                 .setNullable(false)
-                .setPartner(TodoEntityService.ES_NAME);
+                .setPartner(TaskEntityService.ES_NAME);
 
         List<CsdlNavigationProperty> navPropList = new ArrayList<>();
 

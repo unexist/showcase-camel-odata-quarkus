@@ -72,7 +72,7 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
                 .setType(TaskEntityService.ET_FQN)
                 .setContainsTarget(true)
                 .setCollection(true)
-                .setPartner(TaskEntityService.ET_NAME);
+                .setPartner(TodoEntityService.ET_NAME);
 
         List<CsdlNavigationProperty> navPropList = new ArrayList<>();
 
