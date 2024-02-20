@@ -22,6 +22,12 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.json;
 
 @QuarkusTest
 public class ODataServletExpandIT extends ODataServletBaseIT {
+    final Object expectedObject = json(String.join(System.lineSeparator(),
+              "{",
+              "\"ID\": \"${json-unit.any-number}\",",
+              "\"TodoID\": \"${json-unit.any-number}\",",
+              "\"Title\": \"${json-unit.any-string}\"",
+              "}"));
 
     @Test
     public void shouldExpandEntity() {
@@ -34,13 +40,6 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
                 .and()
                     .extract()
                     .asString();
-
-        final Object expectedObject = json(String.join(System.lineSeparator(),
-                "{",
-                "\"ID\": \"${json-unit.any-number}\",",
-                "\"TodoID\": \"${json-unit.any-number}\",",
-                "\"Title\": \"${json-unit.any-string}\"",
-                "}"));
 
         assertThatJson(jsonOut)
                 .inPath("$.Tasks")
@@ -61,13 +60,6 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        final Object expectedObject = json(String.join(System.lineSeparator(),
-                "{",
-                "\"ID\": \"${json-unit.any-number}\",",
-                "\"TodoID\": \"${json-unit.any-number}\",",
-                "\"Title\": \"${json-unit.any-string}\"",
-                "}"));
-
         assertThatJson(jsonOut)
                 .inPath("$.Tasks")
                     .isArray()
@@ -80,17 +72,20 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
-                    .get("/odata/Todos(1)?$expand=Tasks")
+                    .get("/odata/Todos?$expand=Tasks")
                 .then()
                     .statusCode(200)
                 .and()
                     .extract()
                     .asString();
 
+        System.out.println(jsonOut);
+
         assertThatJson(jsonOut)
-                .inPath("$.Task")
-                    .isObject()
-                    .isNotEmpty();
+                .inPath("$.Tasks")
+                    .isArray()
+                    .isNotEmpty()
+                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
@@ -105,9 +100,12 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
+        System.out.println(jsonOut);
+
         assertThatJson(jsonOut)
-                .inPath("$.Task")
-                    .isObject()
-                    .isNotEmpty();
+                .inPath("$.Tasks")
+                    .isArray()
+                    .isNotEmpty()
+                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 }
