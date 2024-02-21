@@ -158,7 +158,18 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3b. Handle $orderby */
+        /* 3b. Handle $expand */
+        expandOption = uriInfo.getExpandOption();
+
+        if (null != expandOption) {
+            Iterator<Entity> entityIterator = entityList.iterator();
+
+            while (entityIterator.hasNext()) {
+                expandEntities(expandOption, startEdmEntitySet, entityIterator.next());
+            }
+        }
+
+        /* 3c. Handle $orderby */
         OrderByOption orderByOption = uriInfo.getOrderByOption();
 
         if (null != orderByOption) {
@@ -206,12 +217,12 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3c. Handle $select */
+        /* 3d. Handle $select */
         SelectOption selectOption = uriInfo.getSelectOption();
 
         responseEntityCollection = new EntityCollection();
 
-        /* 3d. Handle $count */
+        /* 3e. Handle $count */
         CountOption countOption = uriInfo.getCountOption();
 
         if (null != countOption) {
@@ -222,7 +233,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3e. Handle $skip */
+        /* 3f. Handle $skip */
         SkipOption skipOption = uriInfo.getSkipOption();
 
         if (null != skipOption) {
@@ -240,7 +251,7 @@ public class EntityCollectionProcessor extends EntityProcessorBase
             }
         }
 
-        /* 3f. Handle $top */
+        /* 3g. Handle $top */
         TopOption topOption = uriInfo.getTopOption();
 
         if (topOption != null) {
