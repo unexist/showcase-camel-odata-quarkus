@@ -248,10 +248,6 @@ public class EntityStorage {
                             .getEntities());
         }
 
-        if (navigationTargetEntityCollection.getEntities().isEmpty()) {
-            return null;
-        }
-
         return navigationTargetEntityCollection;
     }
 
