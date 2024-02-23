@@ -30,7 +30,7 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
               "}"));
 
     @Test
-    public void shouldExpandEntity() {
+    public void shouldExpandTasksEntity() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -68,7 +68,7 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
     }
 
     @Test
-    public void shouldExpandEntityCollection() {
+    public void shouldExpandTasksInEntityCollection() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
@@ -87,7 +87,7 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
     }
 
     @Test
-    public void shouldExpandAllEntityCollection() {
+    public void shouldExpandAllInEntityCollection() {
         String jsonOut = given()
                 .when()
                     .accept(ContentType.JSON)
