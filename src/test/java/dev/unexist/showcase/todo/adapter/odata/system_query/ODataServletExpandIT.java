@@ -79,13 +79,11 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
-                .inPath("$.Tasks")
+                .inPath("$..Tasks[*]")
                     .isArray()
-                    .isNotEmpty()
-                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
+                    .hasSize(3)
+                    .anySatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test
@@ -100,12 +98,10 @@ public class ODataServletExpandIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        System.out.println(jsonOut);
-
         assertThatJson(jsonOut)
-                .inPath("$.Tasks")
+                .inPath("$..Tasks[*]")
                     .isArray()
-                    .isNotEmpty()
-                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
+                    .hasSize(3)
+                    .anySatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 }
