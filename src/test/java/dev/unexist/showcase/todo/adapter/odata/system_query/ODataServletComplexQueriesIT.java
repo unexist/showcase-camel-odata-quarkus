@@ -22,6 +22,12 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.json;
 
 @QuarkusTest
 public class ODataServletComplexQueriesIT extends ODataServletBaseIT {
+    final Object expectedObject = json(String.join(System.lineSeparator(),
+                "{",
+                "\"@odata.id\": \"${json-unit.any-string}\",",
+                "\"ID\": \"${json-unit.any-number}\",",
+                "\"Title\": \"${json-unit.any-string}\"",
+                "}"));
 
     /* System Queries */
 
@@ -37,21 +43,11 @@ public class ODataServletComplexQueriesIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        final Object expectedObject = json(String.join(System.lineSeparator(),
-                    "{",
-                    "\"@odata.id\": \"${json-unit.any-string}\",",
-                    "\"ID\": \"${json-unit.any-number}\",",
-                    "\"Title\": \"${json-unit.any-string}\"",
-                    "}"));
-
-        assertThatJson(jsonOut)
-                .isObject()
-                    .node("Title").isString();
-
-        assertThatJson(jsonOut)
-                .inPath("$.Tasks")
-                    .isArray()
-                    .isNotEmpty()
-                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
+        assertThatJson(jsonOut).and(
+                elem -> elem.node("Title").isString(),
+                elem -> elem.node("Tasks")
+                        .isArray()
+                        .isNotEmpty()
+                        .allSatisfy(aryElem -> aryElem.equals(expectedObject)));
     }
 }
