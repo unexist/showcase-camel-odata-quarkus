@@ -43,11 +43,14 @@ public class ODataServletComplexQueriesIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
+        System.out.println(jsonOut);
+
         assertThatJson(jsonOut).and(
                 elem -> elem.node("Title").isString(),
                 elem -> elem.node("Tasks")
                         .isArray()
                         .isNotEmpty()
-                        .allSatisfy(aryElem -> aryElem.equals(expectedObject)));
+                        .allSatisfy(aryElem -> assertThatJson(aryElem)
+                                .isEqualTo(expectedObject)));
     }
 }
