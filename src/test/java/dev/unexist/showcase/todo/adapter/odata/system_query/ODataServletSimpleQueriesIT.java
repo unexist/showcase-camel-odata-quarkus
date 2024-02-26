@@ -55,8 +55,8 @@ public class ODataServletSimpleQueriesIT extends ODataServletBaseIT {
 
         assertThatJson(jsonOut)
                 .inPath("$.value")
-                .isArray()
-                .hasSize(2);
+                    .isArray()
+                    .hasSize(2);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class ODataServletSimpleQueriesIT extends ODataServletBaseIT {
 
         assertThatJson(jsonOut)
                 .inPath("$.value")
-                   .isArray()
+                    .isArray()
                     .isNotEmpty();
     }
 }

@@ -83,9 +83,9 @@ public class ODataServletSelectIT extends ODataServletBaseIT {
 
         assertThatJson(jsonOut)
                 .inPath("$.value.[*]")
-                .isArray()
-                .isNotEmpty()
-                .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
+                   .isArray()
+                    .isNotEmpty()
+                    .allSatisfy(elem -> assertThatJson(elem).isEqualTo(expectedObject));
     }
 
     @Test

@@ -80,8 +80,7 @@ public class ODataServletEntityCRUDIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        assertThatJson(jsonOut)
-                .isEqualTo("");
+        assertThatJson(jsonOut).isEqualTo("");
     }
 
     @Test
@@ -98,8 +97,7 @@ public class ODataServletEntityCRUDIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        assertThatJson(jsonOut)
-                .isEqualTo("");
+        assertThatJson(jsonOut).isEqualTo("");
     }
 
     @Test
@@ -115,7 +113,6 @@ public class ODataServletEntityCRUDIT extends ODataServletBaseIT {
                     .extract()
                     .asString();
 
-        assertThatJson(jsonOut)
-                .isEqualTo("");
+        assertThatJson(jsonOut).isEqualTo("");
     }
 }
