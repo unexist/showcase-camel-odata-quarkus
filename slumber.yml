@@ -16,63 +16,66 @@ requests:
       accept: application/json
     body: !json { "description": "string", "done": true, "title": "string" }
 
-  od-create: !request
-    method: POST
-    url: "{{odata_host}}/Todos"
-    headers:
-      accept: application/json
-    body: !json { "description": "string", "done": true, "title": "string" }
+  odata: !folder
+    name: OData
+    requests:
+      od-create: !request
+        method: POST
+        url: "{{odata_host}}/Todos"
+        headers:
+          accept: application/json
+        body: !json { "description": "string", "done": true, "title": "string" }
 
-  od-meta: !request
-    method: GET
-    url: "{{odata_host}}/$metadata"
-    headers:
-      accept: application/json
+      od-meta: !request
+        method: GET
+        url: "{{odata_host}}/$metadata"
+        headers:
+          accept: application/json
 
-  od-all: !request
-    method: GET
-    url: "{{odata_host}}/Todos"
-    headers:
-      accept: application/json
+      od-all: !request
+        method: GET
+        url: "{{odata_host}}/Todos"
+        headers:
+          accept: application/json
 
-  od-first: !request
-    method: GET
-    url: "{{odata_host}}/Todos(1)"
-    headers:
-      accept: application/json
+      od-first: !request
+        method: GET
+        url: "{{odata_host}}/Todos(1)"
+        headers:
+          accept: application/json
 
-  od-first-title: !request
-    method: GET
-    url: "{{odata_host}}/Todos(ID=1)"
-    headers:
-      accept: application/json
+      od-first-title: !request
+        method: GET
+        url: "{{odata_host}}/Todos(ID=1)"
+        headers:
+          accept: application/json
 
-  od-select: !request
-    method: GET
-    url: "{{odata_host}}/Todos(1)?$select=Title"
-    headers:
-      accept: application/json
+      od-select: !request
+        method: GET
+        url: "{{odata_host}}/Todos(1)?$select=Title"
+        headers:
+          accept: application/json
 
-  od-select-all: !request
-    method: GET
-    url: "{{odata_host}}/Todos(1)?$select=*"
-    headers:
-      accept: application/json
+      od-select-all: !request
+        method: GET
+        url: "{{odata_host}}/Todos(1)?$select=*"
+        headers:
+          accept: application/json
 
-  od-expand: !request
-    method: GET
-    url: "{{odata_host}}/Todos(1)?$expand=Tasks"
-    headers:
-      accept: application/json
+      od-expand: !request
+        method: GET
+        url: "{{odata_host}}/Todos(1)?$expand=Tasks"
+        headers:
+          accept: application/json
 
-  od-expand-all: !request
-    method: GET
-    url: "{{odata_host}}/Todos(1)?$expand=*"
-    headers:
-      accept: application/json
+      od-expand-all: !request
+        method: GET
+        url: "{{odata_host}}/Todos(1)?$expand=*"
+        headers:
+          accept: application/json
 
-  od-order: !request
-    method: GET
-    url: "{{odata_host}}/Todos/?$orderBy=ID desc"
-    headers:
-      accept: application/json
+      od-order: !request
+        method: GET
+        url: "{{odata_host}}/Todos/?$orderBy=ID desc"
+        headers:
+          accept: application/json
