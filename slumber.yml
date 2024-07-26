@@ -1,7 +1,7 @@
 profiles:
   development:
     data:
-      host: http://localhost:8080
+      rest_host: http://localhost:8080
       odata_host: http://localhost:8080/odata
 
 requests:
@@ -10,18 +10,18 @@ requests:
     requests:
       get-todo: !request
         method: GET
-        url: "{{host}}/todo"
+        url: "{{rest_host}}/todo"
 
       post-todo: !request
         method: POST
-        url: "{{host}}/todo"
+        url: "{{rest_host}}/todo"
         headers:
           accept: application/json
         body: !json { "Description": "Todo string", "Title": "Todo string" }
 
       post-task: !request
         method: POST
-        url: "{{host}}/task"
+        url: "{{rest_host}}/task"
         headers:
           accept: application/json
         body: !json { "TodoId": 1, "Description": "Task string", "Title": "Task string" }
@@ -29,7 +29,7 @@ requests:
   odata: !folder
     name: OData
     requests:
-      service-doc: !request
+      service-document: !request
         method: GET
         url: "{{odata_host}}/"
         headers:
@@ -44,57 +44,73 @@ requests:
       todo: !folder
         name: Todo
         requests:
-          create: !request
+          todo-create: !request
             method: POST
             url: "{{odata_host}}/Todos"
             headers:
               accept: application/json
             body: !json { "Description": "Todo string", "Title": "Todo string" }
 
-          get-all: !request
+          todo-get-all: !request
             method: GET
             url: "{{odata_host}}/Todos"
             headers:
               accept: application/json
 
-          get-first: !request
+          todo-get-first: !request
             method: GET
             url: "{{odata_host}}/Todos(1)"
             headers:
               accept: application/json
 
-          get-first-title: !request
+          todo-get-first-title: !request
             method: GET
             url: "{{odata_host}}/Todos(ID=1)"
             headers:
               accept: application/json
 
-          select-first-title: !request
+          todo-select-first-title: !request
             method: GET
             url: "{{odata_host}}/Todos(1)?$select=Title"
             headers:
               accept: application/json
 
-          select-all: !request
+          todo-select-all: !request
             method: GET
             url: "{{odata_host}}/Todos(1)?$select=*"
             headers:
               accept: application/json
 
-          expand-first-tasks: !request
+          todo-expand-first-tasks: !request
             method: GET
             url: "{{odata_host}}/Todos(1)?$expand=Tasks"
             headers:
               accept: application/json
 
-          expand-first-all: !request
+          todo-expand-first-all: !request
             method: GET
             url: "{{odata_host}}/Todos(1)?$expand=*"
             headers:
               accept: application/json
 
-          order-by-id: !request
+          todo-order-by-id: !request
             method: GET
             url: "{{odata_host}}/Todos/?$orderBy=ID desc"
+            headers:
+              accept: application/json
+
+      task: !folder
+        name: Task
+        requests:
+          task-create: !request
+            method: POST
+            url: "{{odata_host}}/Tasks"
+            headers:
+              accept: application/json
+            body: !json { "TodoId": 1, "Description": "Task string", "Title": "Task string" }
+
+          task-get-all: !request
+            method: GET
+            url: "{{odata_host}}/Tasks"
             headers:
               accept: application/json
