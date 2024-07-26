@@ -60,6 +60,9 @@ public class TaskEntityService extends EntityServiceBase<Task> {
         CsdlProperty title = new CsdlProperty()
                 .setName("Title")
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty  description = new CsdlProperty()
+                .setName("Description")
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
         /* Create CsdlPropertyRef for Key element */
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
@@ -81,7 +84,7 @@ public class TaskEntityService extends EntityServiceBase<Task> {
         CsdlEntityType entityType = new CsdlEntityType();
 
         entityType.setName(ET_NAME);
-        entityType.setProperties(Arrays.asList(id, todoId, title));
+        entityType.setProperties(Arrays.asList(id, todoId, title, description));
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
 
@@ -103,7 +106,9 @@ public class TaskEntityService extends EntityServiceBase<Task> {
                 .addProperty(new Property(null, "TodoID",
                         ValueType.PRIMITIVE, task.getTodoId()))
                 .addProperty(new Property(null, "Title",
-                        ValueType.PRIMITIVE, task.getTitle()));
+                        ValueType.PRIMITIVE, task.getTitle()))
+                .addProperty(new Property(null, "Description",
+                        ValueType.PRIMITIVE, task.getDescription()));
 
         entity.setType(ET_FQN.getFullQualifiedNameAsString());
         entity.setId(EntityStorage.createId(entity, "ID"));
@@ -131,6 +136,11 @@ public class TaskEntityService extends EntityServiceBase<Task> {
                     ValueType.PRIMITIVE, task.get().getId()));
             entity.addProperty(new Property(null, "TodoID",
                     ValueType.PRIMITIVE, task.get().getTodoId()));
+            entity.addProperty(new Property(null, "Title",
+                    ValueType.PRIMITIVE, task.get().getTitle()));
+            entity.addProperty(new Property(null, "Description",
+                    ValueType.PRIMITIVE, task.get().getDescription()));
+
             entity.setType(ET_FQN.getFullQualifiedNameAsString());
         }
 
