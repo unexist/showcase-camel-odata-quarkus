@@ -125,11 +125,19 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
 
         TodoBase todoBase = new TodoBase();
 
+        todoBase.setTitle(String.valueOf(entity.getProperty("Description").getValue()));
+        todoBase.setDescription(String.valueOf(entity.getProperty("Description").getValue()));
+
         Optional<Todo> todo = this.todoService.create(todoBase);
 
         if (todo.isPresent()) {
             entity.addProperty(new Property(null, "ID",
                     ValueType.PRIMITIVE, todo.get().getId()));
+            entity.addProperty(new Property(null, "Title",
+                    ValueType.PRIMITIVE, todo.get().getTitle()));
+            entity.addProperty(new Property(null, "Description",
+                    ValueType.PRIMITIVE, todo.get().getDescription()));
+
             entity.setType(ET_FQN.getFullQualifiedNameAsString());
         }
 

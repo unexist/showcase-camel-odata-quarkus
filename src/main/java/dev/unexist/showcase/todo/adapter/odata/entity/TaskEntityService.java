@@ -129,6 +129,9 @@ public class TaskEntityService extends EntityServiceBase<Task> {
 
         TaskBase taskBase = new TaskBase();
 
+        taskBase.setTitle(String.valueOf(entity.getProperty("Description").getValue()));
+        taskBase.setDescription(String.valueOf(entity.getProperty("Description").getValue()));
+
         Optional<Task> task = this.taskService.create(taskBase);
 
         if (task.isPresent()) {
@@ -136,10 +139,6 @@ public class TaskEntityService extends EntityServiceBase<Task> {
                     ValueType.PRIMITIVE, task.get().getId()));
             entity.addProperty(new Property(null, "TodoID",
                     ValueType.PRIMITIVE, task.get().getTodoId()));
-            entity.addProperty(new Property(null, "Title",
-                    ValueType.PRIMITIVE, task.get().getTitle()));
-            entity.addProperty(new Property(null, "Description",
-                    ValueType.PRIMITIVE, task.get().getDescription()));
 
             entity.setType(ET_FQN.getFullQualifiedNameAsString());
         }
