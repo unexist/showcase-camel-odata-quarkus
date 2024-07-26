@@ -34,7 +34,7 @@ public class TodoBase {
      **/
 
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
     /**
@@ -54,7 +54,7 @@ public class TodoBase {
      **/
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     /**
@@ -75,7 +75,7 @@ public class TodoBase {
      **/
 
     public DueDate getDueDate() {
-        return dueDate;
+        return this.dueDate;
     }
 
     /**

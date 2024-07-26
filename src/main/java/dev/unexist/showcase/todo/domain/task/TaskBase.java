@@ -31,7 +31,7 @@ public class TaskBase {
      **/
 
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
     /**
@@ -51,7 +51,7 @@ public class TaskBase {
      **/
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     /**
@@ -72,7 +72,7 @@ public class TaskBase {
      **/
 
     public Boolean getDone() {
-        return done;
+        return this.done;
     }
 
     /**
