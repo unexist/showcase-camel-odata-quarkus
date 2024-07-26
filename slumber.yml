@@ -17,14 +17,14 @@ requests:
         url: "{{rest_host}}/todo"
         headers:
           accept: application/json
-        body: !json { "Description": "Todo string", "Title": "Todo string" }
+        body: !json { "description": "Todo string", "title": "Todo string" }
 
       post-task: !request
         method: POST
         url: "{{rest_host}}/task"
         headers:
           accept: application/json
-        body: !json { "TodoId": 1, "Description": "Task string", "Title": "Task string" }
+        body: !json { "todoId": 1, "description": "Task string", "title": "Task string" }
 
   odata: !folder
     name: OData
@@ -107,7 +107,7 @@ requests:
             url: "{{odata_host}}/Tasks"
             headers:
               accept: application/json
-            body: !json { "TodoId": 1, "Description": "Task string", "Title": "Task string" }
+            body: !json { "TodoID": 1, "Description": "Task string", "Title": "Task string" }
 
           task-get-all: !request
             method: GET
