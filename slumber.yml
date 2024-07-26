@@ -5,77 +5,96 @@ profiles:
       odata_host: http://localhost:8080/odata
 
 requests:
-  list: !request
-    method: GET
-    url: "{{host}}/todo"
+  rest: !folder
+    name: REST
+    requests:
+      get-todo: !request
+        method: GET
+        url: "{{host}}/todo"
 
-  todo: !request
-    method: POST
-    url: "{{host}}/todo"
-    headers:
-      accept: application/json
-    body: !json { "description": "string", "done": true, "title": "string" }
+      post-todo: !request
+        method: POST
+        url: "{{host}}/todo"
+        headers:
+          accept: application/json
+        body: !json { "Description": "Todo string", "Title": "Todo string" }
+
+      post-task: !request
+        method: POST
+        url: "{{host}}/task"
+        headers:
+          accept: application/json
+        body: !json { "TodoId": 1, "Description": "Task string", "Title": "Task string" }
 
   odata: !folder
     name: OData
     requests:
-      od-create: !request
-        method: POST
-        url: "{{odata_host}}/Todos"
+      service-doc: !request
+        method: GET
+        url: "{{odata_host}}/"
         headers:
           accept: application/json
-        body: !json { "description": "string", "done": true, "title": "string" }
 
-      od-meta: !request
+      metadata: !request
         method: GET
         url: "{{odata_host}}/$metadata"
         headers:
           accept: application/json
 
-      od-all: !request
-        method: GET
-        url: "{{odata_host}}/Todos"
-        headers:
-          accept: application/json
+      todo: !folder
+        name: Todo
+        requests:
+          create: !request
+            method: POST
+            url: "{{odata_host}}/Todos"
+            headers:
+              accept: application/json
+            body: !json { "Description": "Todo string", "Title": "Todo string" }
 
-      od-first: !request
-        method: GET
-        url: "{{odata_host}}/Todos(1)"
-        headers:
-          accept: application/json
+          get-all: !request
+            method: GET
+            url: "{{odata_host}}/Todos"
+            headers:
+              accept: application/json
 
-      od-first-title: !request
-        method: GET
-        url: "{{odata_host}}/Todos(ID=1)"
-        headers:
-          accept: application/json
+          get-first: !request
+            method: GET
+            url: "{{odata_host}}/Todos(1)"
+            headers:
+              accept: application/json
 
-      od-select: !request
-        method: GET
-        url: "{{odata_host}}/Todos(1)?$select=Title"
-        headers:
-          accept: application/json
+          get-first-title: !request
+            method: GET
+            url: "{{odata_host}}/Todos(ID=1)"
+            headers:
+              accept: application/json
 
-      od-select-all: !request
-        method: GET
-        url: "{{odata_host}}/Todos(1)?$select=*"
-        headers:
-          accept: application/json
+          select-first-title: !request
+            method: GET
+            url: "{{odata_host}}/Todos(1)?$select=Title"
+            headers:
+              accept: application/json
 
-      od-expand: !request
-        method: GET
-        url: "{{odata_host}}/Todos(1)?$expand=Tasks"
-        headers:
-          accept: application/json
+          select-all: !request
+            method: GET
+            url: "{{odata_host}}/Todos(1)?$select=*"
+            headers:
+              accept: application/json
 
-      od-expand-all: !request
-        method: GET
-        url: "{{odata_host}}/Todos(1)?$expand=*"
-        headers:
-          accept: application/json
+          expand-first-tasks: !request
+            method: GET
+            url: "{{odata_host}}/Todos(1)?$expand=Tasks"
+            headers:
+              accept: application/json
 
-      od-order: !request
-        method: GET
-        url: "{{odata_host}}/Todos/?$orderBy=ID desc"
-        headers:
-          accept: application/json
+          expand-first-all: !request
+            method: GET
+            url: "{{odata_host}}/Todos(1)?$expand=*"
+            headers:
+              accept: application/json
+
+          order-by-id: !request
+            method: GET
+            url: "{{odata_host}}/Todos/?$orderBy=ID desc"
+            headers:
+              accept: application/json
