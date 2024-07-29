@@ -95,7 +95,7 @@ requests:
 
           todo-order-by-id: !request
             method: GET
-            url: "{{odata_host}}/Todos/?$orderBy=ID desc"
+            url: "{{odata_host}}/Todos?$orderby=ID desc"
             headers:
               accept: application/json
 
