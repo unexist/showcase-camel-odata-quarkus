@@ -135,10 +135,10 @@ public class TaskEntityService extends EntityServiceBase<Task> {
         Optional<Task> task = this.taskService.create(taskBase);
 
         if (task.isPresent()) {
+            task.get().setTodoId((Integer)entity.getProperty("TodoID").getValue());
+
             entity.addProperty(new Property(null, "ID",
                     ValueType.PRIMITIVE, task.get().getId()));
-            entity.addProperty(new Property(null, "TodoID",
-                    ValueType.PRIMITIVE, task.get().getTodoId()));
 
             entity.setType(ET_FQN.getFullQualifiedNameAsString());
         }
