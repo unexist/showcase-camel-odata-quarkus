@@ -116,6 +116,15 @@ public class TaskEntityService extends EntityServiceBase<Task> {
         return entity;
     }
 
+    private TaskBase extractFromEntity(Entity entity) {
+        TaskBase taskBase = new TaskBase();
+
+        taskBase.setTitle(String.valueOf(entity.getProperty("Description").getValue()));
+        taskBase.setDescription(String.valueOf(entity.getProperty("Description").getValue()));
+
+        return taskBase;
+    }
+
     /**
      * Create new entity
      *
@@ -127,12 +136,7 @@ public class TaskEntityService extends EntityServiceBase<Task> {
     public Entity createEntity(Entity entity) {
         Objects.requireNonNull(entity, "Entity not found");
 
-        TaskBase taskBase = new TaskBase();
-
-        taskBase.setTitle(String.valueOf(entity.getProperty("Description").getValue()));
-        taskBase.setDescription(String.valueOf(entity.getProperty("Description").getValue()));
-
-        Optional<Task> task = this.taskService.create(taskBase);
+        Optional<Task> task = this.taskService.create(this.extractFromEntity(entity));
 
         if (task.isPresent()) {
             task.get().setTodoId((Integer)entity.getProperty("TodoID").getValue());
@@ -154,6 +158,10 @@ public class TaskEntityService extends EntityServiceBase<Task> {
 
     public void updateEntity(Entity entity) {
         Objects.requireNonNull(entity, "Entity not found");
+
+        Integer existingID = (Integer)entity.getProperty("ID").getValue();
+
+        this.taskService.update(existingID, extractFromEntity(entity));
     }
 
     /**

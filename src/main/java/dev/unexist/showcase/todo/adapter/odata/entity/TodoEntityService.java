@@ -112,6 +112,15 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
         return entity;
     }
 
+    private TodoBase extractFromEntity(Entity entity) {
+        TodoBase todoBase = new TodoBase();
+
+        todoBase.setTitle(String.valueOf(entity.getProperty("Title").getValue()));
+        todoBase.setDescription(String.valueOf(entity.getProperty("Description").getValue()));
+
+        return todoBase;
+    }
+
     /**
      * Create new entity
      *
@@ -123,12 +132,7 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
     public Entity createEntity(Entity entity) {
         Objects.requireNonNull(entity, "Entity not found");
 
-        TodoBase todoBase = new TodoBase();
-
-        todoBase.setTitle(String.valueOf(entity.getProperty("Title").getValue()));
-        todoBase.setDescription(String.valueOf(entity.getProperty("Description").getValue()));
-
-        Optional<Todo> todo = this.todoService.create(todoBase);
+        Optional<Todo> todo = this.todoService.create(extractFromEntity(entity));
 
         if (todo.isPresent()) {
             entity.addProperty(new Property(null, "ID",
@@ -148,6 +152,10 @@ public class TodoEntityService extends EntityServiceBase<Todo> {
 
     public void updateEntity(Entity entity) {
         Objects.requireNonNull(entity, "Entity not found");
+
+        Integer existingID = (Integer)entity.getProperty("ID").getValue();
+
+        this.todoService.update(existingID, extractFromEntity(entity));
     }
 
     /**
