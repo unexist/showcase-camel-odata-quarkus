@@ -151,7 +151,7 @@ public class EntityStorage {
                 continue;
             }
 
-            Property updateProperty = foundEntity.getProperty(propName);
+            Property updateProperty = updateEntity.getProperty(propName);
 
             if (null == updateProperty) {
                 /* If a property has NOT been added to the request payload depending on the
@@ -172,7 +172,7 @@ public class EntityStorage {
 
         /* Finally update entity */
         if (TodoEntityService.ET_NAME.equals(edmEntityType.getName())) {
-            this.taskEntityService.updateEntity(foundEntity);
+            this.todoEntityService.updateEntity(foundEntity);
         } else if (TaskEntityService.ET_NAME.equals(edmEntityType.getName())) {
             this.taskEntityService.updateEntity(foundEntity);
         }
