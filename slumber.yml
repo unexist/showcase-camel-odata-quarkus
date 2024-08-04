@@ -69,19 +69,31 @@ requests:
             headers:
               accept: application/json
 
-          todo-get-count: !request
+          todo-sys-count: !request
             method: GET
             url: "{{odata_host}}/Todos?$count=true"
             headers:
               accept: application/json
 
-          todo-get-filter-id: !request
+          todo-sys-top: !request
+            method: GET
+            url: "{{odata_host}}/Todos?$top=1"
+            headers:
+              accept: application/json
+
+          todo-sys-skip: !request
+            method: GET
+            url: "{{odata_host}}/Todos?$skip=1"
+            headers:
+              accept: application/json
+
+          todo-filter-id: !request
             method: GET
             url: "{{odata_host}}/Todos?$filter=ID eq 1"
             headers:
               accept: application/json
 
-          todo-get-filter-div: !request
+          todo-filter-div: !request
             method: GET
             url: "{{odata_host}}/Todos?$filter=ID div 1 eq 1"
             headers:
