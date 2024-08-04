@@ -135,6 +135,19 @@ requests:
             headers:
               accept: application/json
 
+          todo-update: !request
+            method: PUT
+            url: "{{odata_host}}/Todos(1)"
+            headers:
+              accept: application/json
+            body: !json { "Description": "Todo string updated", "Title": "Todo string updated" }
+
+          todo-delete: !request
+            method: DELETE
+            url: "{{odata_host}}/Todos(1)"
+            headers:
+              accept: application/json
+
       task: !folder
         name: Task
         requests:
@@ -148,5 +161,18 @@ requests:
           task-get-all: !request
             method: GET
             url: "{{odata_host}}/Tasks"
+            headers:
+              accept: application/json
+
+          task-update: !request
+            method: PUT
+            url: "{{odata_host}}/Tasks(1)"
+            headers:
+              accept: application/json
+            body: !json { "Description": "Task string updated", "Title": "Task string updated" }
+
+          task-delete: !request
+            method: DELETE
+            url: "{{odata_host}}/Tasks(1)"
             headers:
               accept: application/json
