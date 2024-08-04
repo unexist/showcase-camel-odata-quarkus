@@ -123,6 +123,12 @@ requests:
             headers:
               accept: application/json
 
+          todo-complex-query: !request
+            method: GET
+            url: "{{odata_host}}/Todos?$filter=ID div 1 eq 1&$select=Title&$expand=Tasks($select=Title)"
+            headers:
+              accept: application/json
+
           todo-order-by-id: !request
             method: GET
             url: "{{odata_host}}/Todos?$orderby=ID desc"
